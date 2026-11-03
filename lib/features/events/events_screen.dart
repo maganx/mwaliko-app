@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/config.dart';
 import '../../core/event_types.dart';
 import '../../core/swahili_time.dart';
 import '../../core/theme.dart';
@@ -33,11 +34,8 @@ class _EventsScreenState extends State<EventsScreen> {
       appBar: AppBar(
         title: const Text('Matukio yangu'),
         actions: [
-          IconButton(
-            tooltip: 'Toka',
-            icon: const Icon(Icons.logout_rounded),
-            onPressed: () => sb.auth.signOut(),
-          ),
+          if (!AppConfig.demo)
+            IconButton(tooltip: 'Toka', icon: const Icon(Icons.logout_rounded), onPressed: () => sb.auth.signOut()),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(

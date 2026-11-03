@@ -1,3 +1,5 @@
+import '../core/config.dart';
+import 'demo_store.dart';
 import 'supabase.dart';
 
 enum Channel {
@@ -16,11 +18,11 @@ class SendSummary {
   final List<String> errors;
 
   SendSummary operator +(SendSummary o) => SendSummary(
-        sent: sent + o.sent,
-        failed: failed + o.failed,
-        skipped: skipped + o.skipped,
-        errors: [...errors, ...o.errors],
-      );
+    sent: sent + o.sent,
+    failed: failed + o.failed,
+    skipped: skipped + o.skipped,
+    errors: [...errors, ...o.errors],
+  );
 }
 
 class Delivery {
@@ -39,12 +41,12 @@ class Delivery {
   final DateTime createdAt;
 
   factory Delivery.fromJson(Map<String, dynamic> j) => Delivery(
-        guestId: j['guest_id'] as String,
-        channel: j['channel'] as String,
-        status: j['status'] as String,
-        error: j['error'] as String?,
-        createdAt: DateTime.parse(j['created_at'] as String).toLocal(),
-      );
+    guestId: j['guest_id'] as String,
+    channel: j['channel'] as String,
+    status: j['status'] as String,
+    error: j['error'] as String?,
+    createdAt: DateTime.parse(j['created_at'] as String).toLocal(),
+  );
 }
 
 class InvitationsRepository {
@@ -59,14 +61,14 @@ class InvitationsRepository {
     required Set<Channel> channels,
     void Function(int done, int total)? onProgress,
   }) async {
+    if (AppConfig.demo) return _demoSend(eventId, guestIds, channels, onProgress);
     var total = const SendSummary();
     for (var i = 0; i < guestIds.length; i += batchSize) {
       final batch = guestIds.skip(i).take(batchSize).toList();
-      final res = await sb.functions.invoke('send-invitations', body: {
-        'event_id': eventId,
-        'guest_ids': batch,
-        'channels': channels.map((c) => c.id).toList(),
-      });
+      final res = await sb.functions.invoke(
+        'send-invitations',
+        body: {'event_id': eventId, 'guest_ids': batch, 'channels': channels.map((c) => c.id).toList()},
+      );
       final data = res.data as Map<String, dynamic>;
       final errors = <String>[
         for (final r in (data['results'] as List? ?? const []))
@@ -83,7 +85,43 @@ class InvitationsRepository {
     return total;
   }
 
+  /// Demo: hakuna ujumbe unaotumwa kweli; tunaandika tu "Imetumwa" kwenye historia.
+  Future<SendSummary> _demoSend(
+    String eventId,
+    List<String> guestIds,
+    Set<Channel> channels,
+    void Function(int done, int total)? onProgress,
+  ) async {
+    final demo = DemoStore.instance;
+    var sent = 0, skipped = 0;
+    for (final (i, id) in guestIds.indexed) {
+      final g = demo.guests[id]!;
+      for (final c in channels) {
+        final reachable = c == Channel.email ? g['email'] != null : g['phone'] != null;
+        if (!reachable) {
+          skipped++;
+          continue;
+        }
+        sent++;
+        demo.deliveries.insert(0, {
+          'event_id': eventId,
+          'guest_id': id,
+          'channel': c.id,
+          'status': 'sent',
+          'error': null,
+          'created_at': demo.now(),
+        });
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+      onProgress?.call(i + 1, guestIds.length);
+    }
+    return SendSummary(sent: sent, skipped: skipped);
+  }
+
   Future<List<Delivery>> deliveries(String eventId) async {
+    if (AppConfig.demo) {
+      return DemoStore.instance.deliveries.where((d) => d['event_id'] == eventId).map(Delivery.fromJson).toList();
+    }
     final rows = await sb
         .from('deliveries')
         .select()

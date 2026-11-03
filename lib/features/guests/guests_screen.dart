@@ -1,6 +1,5 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/config.dart';
@@ -100,13 +99,16 @@ class _GuestsScreenState extends State<GuestsScreen> {
       return;
     }
     try {
-      final url = const CardsRepository().publicUrl(g.cardPath!);
-      final res = await http.get(Uri.parse(url));
-      final rsvp = AppConfig.rsvpBaseUrl.isEmpty ? '' : '\nThibitisha kuhudhuria: ${AppConfig.rsvpBaseUrl}?t=${g.rsvpToken}';
-      await SharePlus.instance.share(ShareParams(
-        files: [XFile.fromData(res.bodyBytes, mimeType: 'image/png', name: 'mwaliko-${g.name}.png')],
-        text: 'Habari ${g.name}, karibu sana kwenye sherehe yetu.$rsvp',
-      ));
+      final bytes = await const CardsRepository().cardBytes(g.cardPath!);
+      final rsvp = AppConfig.rsvpBaseUrl.isEmpty
+          ? ''
+          : '\nThibitisha kuhudhuria: ${AppConfig.rsvpBaseUrl}?t=${g.rsvpToken}';
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile.fromData(bytes, mimeType: 'image/png', name: 'mwaliko-${g.name}.png')],
+          text: 'Habari ${g.name}, karibu sana kwenye sherehe yetu.$rsvp',
+        ),
+      );
     } catch (e) {
       if (mounted) showSnack(context, friendlyError(e));
     }
@@ -127,9 +129,18 @@ class _GuestsScreenState extends State<GuestsScreen> {
               _ => _fromFile(),
             },
             itemBuilder: (_) => const [
-              PopupMenuItem(value: 'one', child: ListTile(leading: Icon(Icons.person_add), title: Text('Mmoja mmoja'))),
-              PopupMenuItem(value: 'contacts', child: ListTile(leading: Icon(Icons.contacts), title: Text('Kutoka contacts'))),
-              PopupMenuItem(value: 'file', child: ListTile(leading: Icon(Icons.table_chart), title: Text('Kutoka Excel / CSV'))),
+              PopupMenuItem(
+                value: 'one',
+                child: ListTile(leading: Icon(Icons.person_add), title: Text('Mmoja mmoja')),
+              ),
+              PopupMenuItem(
+                value: 'contacts',
+                child: ListTile(leading: Icon(Icons.contacts), title: Text('Kutoka contacts')),
+              ),
+              PopupMenuItem(
+                value: 'file',
+                child: ListTile(leading: Icon(Icons.table_chart), title: Text('Kutoka Excel / CSV')),
+              ),
             ],
           ),
         ],
@@ -199,14 +210,19 @@ class _GuestsScreenState extends State<GuestsScreen> {
                           onTap: () => _addOrEdit(g),
                           leading: CircleAvatar(
                             backgroundColor: MwalikoColors.maroon.withValues(alpha: 0.1),
-                            child: Text(g.name.characters.first.toUpperCase(), style: const TextStyle(color: MwalikoColors.maroon)),
+                            child: Text(
+                              g.name.characters.first.toUpperCase(),
+                              style: const TextStyle(color: MwalikoColors.maroon),
+                            ),
                           ),
                           title: Text(g.name),
-                          subtitle: Text([
-                            if (g.phone != null) formatPhone(g.phone),
-                            if (g.email != null) g.email!,
-                            if (g.seats > 1) 'watu ${g.seats}',
-                          ].join(' · ')),
+                          subtitle: Text(
+                            [
+                              if (g.phone != null) formatPhone(g.phone),
+                              if (g.phone == null && g.email != null) g.email!,
+                              if (g.seats > 1) 'watu ${g.seats}',
+                            ].join(' · '),
+                          ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -250,7 +266,10 @@ class _RsvpChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-      child: Text(label, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600)),
+      child: Text(
+        label,
+        style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600),
+      ),
     );
   }
 }
@@ -304,7 +323,10 @@ class _GuestFormState extends State<_GuestForm> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(widget.existing == null ? 'Mwalikwa mpya' : 'Hariri mwalikwa', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              widget.existing == null ? 'Mwalikwa mpya' : 'Hariri mwalikwa',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _name,
@@ -340,9 +362,15 @@ class _GuestFormState extends State<_GuestForm> {
             Row(
               children: [
                 const Expanded(child: Text('Idadi ya watu kwenye kadi')),
-                IconButton(onPressed: _seats > 1 ? () => setState(() => _seats--) : null, icon: const Icon(Icons.remove_circle_outline)),
+                IconButton(
+                  onPressed: _seats > 1 ? () => setState(() => _seats--) : null,
+                  icon: const Icon(Icons.remove_circle_outline),
+                ),
                 Text('$_seats', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                IconButton(onPressed: _seats < 20 ? () => setState(() => _seats++) : null, icon: const Icon(Icons.add_circle_outline)),
+                IconButton(
+                  onPressed: _seats < 20 ? () => setState(() => _seats++) : null,
+                  icon: const Icon(Icons.add_circle_outline),
+                ),
               ],
             ),
             const SizedBox(height: 12),

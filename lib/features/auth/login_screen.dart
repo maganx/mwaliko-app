@@ -74,10 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     textAlign: TextAlign.center,
                     style: TextStyle(fontFamily: 'GreatVibes', fontSize: 56, color: MwalikoColors.maroon),
                   ),
-                  const Text(
-                    'Tuma kadi za mwaliko kwa SMS, WhatsApp na email',
-                    textAlign: TextAlign.center,
-                  ),
+                  const Text('Tuma kadi za mwaliko kwa SMS, WhatsApp na email', textAlign: TextAlign.center),
                   const SizedBox(height: 32),
                   TextField(
                     controller: _email,

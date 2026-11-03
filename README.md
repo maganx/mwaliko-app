@@ -104,6 +104,16 @@ flutter build appbundle --dart-define-from-file=env.json   # Google Play
 flutter build ipa --dart-define-from-file=env.json         # App Store (inahitaji Mac + Xcode)
 ```
 
+## Toleo la majaribio (demo)
+
+Demo ina data ya mfano na haihitaji Supabase wala funguo zozote. Hakuna ujumbe unaotumwa kweli.
+
+```bash
+flutter run --dart-define=DEMO=true                  # kwenye simu au emulator
+flutter run -d chrome --dart-define=DEMO=true        # kwenye kivinjari
+flutter build web --dart-define=DEMO=true --no-web-resources-cdn   # kujenga demo ya web
+```
+
 ## Tests
 
 ```bash

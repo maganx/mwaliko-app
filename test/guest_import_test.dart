@@ -7,7 +7,8 @@ import 'package:mwaliko/features/guests/guest_import.dart';
 
 void main() {
   test('CSV yenye vichwa vya Kiswahili', () {
-    const csv = 'Jina,Simu,Email,Idadi\n'
+    const csv =
+        'Jina,Simu,Email,Idadi\n'
         'Rehema Salim,0712 345 678,,2\n'
         '"Juma, Mzee",+255 754 000 111,juma@example.com,1\n'
         'Bila Mawasiliano,,,1\n';

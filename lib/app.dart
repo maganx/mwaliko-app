@@ -28,7 +28,7 @@ class _MwalikoAppState extends State<MwalikoApp> {
 
   @override
   Widget build(BuildContext context) {
-    if (!AppConfig.isConfigured) {
+    if (!AppConfig.isConfigured && !AppConfig.demo) {
       return MaterialApp(theme: buildTheme(), home: const _SetupRequired());
     }
     return MaterialApp.router(
@@ -36,6 +36,7 @@ class _MwalikoAppState extends State<MwalikoApp> {
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
       routerConfig: _router,
+      builder: AppConfig.demo ? (context, child) => _DemoFrame(child: child!) : null,
       locale: const Locale('sw'),
       supportedLocales: const [Locale('sw'), Locale('en')],
       localizationsDelegates: const [
@@ -48,10 +49,12 @@ class _MwalikoAppState extends State<MwalikoApp> {
 }
 
 GoRouter _buildRouter() {
+  if (AppConfig.demo) return GoRouter(initialLocation: '/', routes: _routes);
   final auth = Supabase.instance.client.auth;
   return GoRouter(
     initialLocation: '/',
     refreshListenable: _AuthListenable(auth.onAuthStateChange),
+    routes: _routes,
     redirect: (context, state) {
       final loggedIn = auth.currentSession != null;
       final atLogin = state.matchedLocation == '/login';
@@ -59,24 +62,40 @@ GoRouter _buildRouter() {
       if (loggedIn && atLogin) return '/';
       return null;
     },
-    routes: [
-      GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
-      GoRoute(path: '/', builder: (_, _) => const EventsScreen()),
-      GoRoute(path: '/events/new', builder: (_, _) => const EventFormScreen()),
-      GoRoute(
-        path: '/events/:id',
-        builder: (_, s) => EventDetailScreen(eventId: s.pathParameters['id']!),
-        routes: [
-          GoRoute(path: 'edit', builder: (_, s) => EventFormScreen(eventId: s.pathParameters['id'])),
-          GoRoute(path: 'guests', builder: (_, s) => GuestsScreen(eventId: s.pathParameters['id']!)),
-          GoRoute(path: 'card', builder: (_, s) => CardStudioScreen(eventId: s.pathParameters['id']!)),
-          GoRoute(path: 'send', builder: (_, s) => SendScreen(eventId: s.pathParameters['id']!)),
-          GoRoute(path: 'checkin', builder: (_, s) => CheckinScreen(eventId: s.pathParameters['id']!)),
-        ],
-      ),
-    ],
   );
 }
+
+final _routes = <RouteBase>[
+  GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
+  GoRoute(path: '/', builder: (_, _) => const EventsScreen()),
+  GoRoute(path: '/events/new', builder: (_, _) => const EventFormScreen()),
+  GoRoute(
+    path: '/events/:id',
+    builder: (_, s) => EventDetailScreen(eventId: s.pathParameters['id']!),
+    routes: [
+      GoRoute(
+        path: 'edit',
+        builder: (_, s) => EventFormScreen(eventId: s.pathParameters['id']),
+      ),
+      GoRoute(
+        path: 'guests',
+        builder: (_, s) => GuestsScreen(eventId: s.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: 'card',
+        builder: (_, s) => CardStudioScreen(eventId: s.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: 'send',
+        builder: (_, s) => SendScreen(eventId: s.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: 'checkin',
+        builder: (_, s) => CheckinScreen(eventId: s.pathParameters['id']!),
+      ),
+    ],
+  ),
+];
 
 class _AuthListenable extends ChangeNotifier {
   _AuthListenable(Stream<AuthState> stream) {
@@ -91,21 +110,53 @@ class _AuthListenable extends ChangeNotifier {
   }
 }
 
+/// Ukanda mdogo juu unaoonyesha kuwa hili ni toleo la majaribio.
+class _DemoFrame extends StatelessWidget {
+  const _DemoFrame({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final top = MediaQuery.paddingOf(context).top;
+    return Column(
+      children: [
+        Material(
+          color: MwalikoColors.gold,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(12, top + 3, 12, 3),
+            child: const SizedBox(
+              width: double.infinity,
+              child: Text(
+                'DEMO · data ya mfano, hakuna ujumbe unaotumwa kweli',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: MwalikoColors.ink),
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: MediaQuery.removePadding(context: context, removeTop: true, child: child),
+        ),
+      ],
+    );
+  }
+}
+
 class _SetupRequired extends StatelessWidget {
   const _SetupRequired();
 
   @override
   Widget build(BuildContext context) => const Scaffold(
-        body: Center(
-          child: Padding(
-            padding: EdgeInsets.all(24),
-            child: Text(
-              'Mwaliko haijaunganishwa na Supabase.\n\n'
-              'Endesha app hivi:\nflutter run --dart-define-from-file=env.json\n\n'
-              '(angalia env.example.json na README)',
-              textAlign: TextAlign.center,
-            ),
-          ),
+    body: Center(
+      child: Padding(
+        padding: EdgeInsets.all(24),
+        child: Text(
+          'Mwaliko haijaunganishwa na Supabase.\n\n'
+          'Endesha app hivi:\nflutter run --dart-define-from-file=env.json\n\n'
+          '(angalia env.example.json na README)',
+          textAlign: TextAlign.center,
         ),
-      );
+      ),
+    ),
+  );
 }

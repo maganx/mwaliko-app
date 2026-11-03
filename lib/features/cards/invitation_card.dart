@@ -42,8 +42,7 @@ class InvitationCard extends StatelessWidget {
 
   static const templateSize = Size(540, 675);
 
-  static Size designSizeFor(CardConfig c) =>
-      c.isCustom ? Size(540, 540 / c.customAspect) : templateSize;
+  static Size designSizeFor(CardConfig c) => c.isCustom ? Size(540, 540 / c.customAspect) : templateSize;
 
   Size get designSize => designSizeFor(config);
 
@@ -78,11 +77,7 @@ class InvitationCard extends StatelessWidget {
     } else {
       bg = Container(color: const Color(0xFFE0E0E0));
     }
-    final nameStyle = cardFont(
-      config.nameFont,
-      size.width * config.nameSize,
-      color: Color(config.nameColor),
-    );
+    final nameStyle = cardFont(config.nameFont, size.width * config.nameSize, color: Color(config.nameColor));
     final qrSide = size.width * config.qrSize;
 
     return Stack(
@@ -94,26 +89,20 @@ class InvitationCard extends StatelessWidget {
           config.namePosition,
           SizedBox(
             width: size.width * 0.9,
-            child: Text(
-              guestName ?? 'Jina la Mwalikwa',
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              style: nameStyle,
-            ),
+            child: Text(guestName ?? 'Jina la Mwalikwa', textAlign: TextAlign.center, maxLines: 2, style: nameStyle),
           ),
         ),
-        if (config.showQr)
-          _anchored(size, config.qrPosition, _qr(qrSide, const Color(0xFF111111))),
+        if (config.showQr) _anchored(size, config.qrPosition, _qr(qrSide, const Color(0xFF111111))),
       ],
     );
   }
 
   /// Inaweka [child] ili katikati yake iwe kwenye [pos] (sehemu ya 0..1 ya kadi).
   Widget _anchored(Size size, Offset pos, Widget child) => Positioned(
-        left: pos.dx * size.width,
-        top: pos.dy * size.height,
-        child: FractionalTranslation(translation: const Offset(-0.5, -0.5), child: child),
-      );
+    left: pos.dx * size.width,
+    top: pos.dy * size.height,
+    child: FractionalTranslation(translation: const Offset(-0.5, -0.5), child: child),
+  );
 
   // -------------------------------------------------------------------------
   // Template za Mwaliko
@@ -148,7 +137,9 @@ class InvitationCard extends StatelessWidget {
             child: CustomPaint(painter: _BannerPainter(palette.primary)),
           ),
         Positioned.fill(
-          child: CustomPaint(painter: OrnamentPainter(ornamentId: config.ornamentId, palette: palette)),
+          child: CustomPaint(
+            painter: OrnamentPainter(ornamentId: config.ornamentId, palette: palette),
+          ),
         ),
         if (layout == 'framed')
           Positioned.fill(
@@ -195,9 +186,9 @@ class InvitationCard extends StatelessWidget {
 
   /// Inapunguza maudhui yakiwa marefu kuliko kadi, badala ya kuyakata.
   Widget _fit(double width, Widget child) => FittedBox(
-        fit: BoxFit.scaleDown,
-        child: SizedBox(width: width, child: child),
-      );
+    fit: BoxFit.scaleDown,
+    child: SizedBox(width: width, child: child),
+  );
 
   String get _heading => eventTypeById(event.eventType).cardHeading;
 
@@ -208,7 +199,11 @@ class InvitationCard extends StatelessWidget {
     final body = cardFont(f.body, 16, color: c);
     final small = cardFont(f.body, 12.5, color: c.withValues(alpha: 0.85));
     return [
-      Text(swahiliDate(event.eventDate), textAlign: TextAlign.center, style: cardFont(f.body, 17, color: c, weight: FontWeight.w700)),
+      Text(
+        swahiliDate(event.eventDate),
+        textAlign: TextAlign.center,
+        style: cardFont(f.body, 17, color: c, weight: FontWeight.w700),
+      ),
       const SizedBox(height: 2),
       Text(swahiliTime(event.eventDate), textAlign: TextAlign.center, style: body),
       if (_has(event.venue)) ...[
@@ -227,17 +222,20 @@ class InvitationCard extends StatelessWidget {
   }
 
   Widget _guestBlock(CardPalette p, FontPair f, {Color? labelColor}) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('Mpendwa', style: cardFont(f.body, 13, color: (labelColor ?? p.text).withValues(alpha: 0.8), letterSpacing: 2)),
-          Text(
-            guestName ?? 'Jina la Mwalikwa',
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            style: cardFont(f.script, 40, color: p.primary, height: 1.15),
-          ),
-        ],
-      );
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(
+        'Mpendwa',
+        style: cardFont(f.body, 13, color: (labelColor ?? p.text).withValues(alpha: 0.8), letterSpacing: 2),
+      ),
+      Text(
+        guestName ?? 'Jina la Mwalikwa',
+        textAlign: TextAlign.center,
+        maxLines: 2,
+        style: cardFont(f.script, 40, color: p.primary, height: 1.15),
+      ),
+    ],
+  );
 
   Widget _footer(CardPalette p, FontPair f) {
     if (!config.showQr) return const SizedBox.shrink();
@@ -281,7 +279,14 @@ class InvitationCard extends StatelessWidget {
           _title(f),
           textAlign: TextAlign.center,
           maxLines: 3,
-          style: cardFont(f.title, f.titleUpper ? 30 : 36, color: p.text, weight: FontWeight.w700, height: 1.1, letterSpacing: f.titleUpper ? 2 : 0),
+          style: cardFont(
+            f.title,
+            f.titleUpper ? 30 : 36,
+            color: p.text,
+            weight: FontWeight.w700,
+            height: 1.1,
+            letterSpacing: f.titleUpper ? 2 : 0,
+          ),
         ),
         const SizedBox(height: 12),
         _Divider(color: p.primary),
@@ -317,14 +322,26 @@ class InvitationCard extends StatelessWidget {
                   Text(
                     _heading.toUpperCase(),
                     textAlign: TextAlign.center,
-                    style: cardFont(f.body, 13, color: onBanner.withValues(alpha: 0.9), letterSpacing: 4, weight: FontWeight.w700),
+                    style: cardFont(
+                      f.body,
+                      13,
+                      color: onBanner.withValues(alpha: 0.9),
+                      letterSpacing: 4,
+                      weight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     _title(f),
                     textAlign: TextAlign.center,
                     maxLines: 3,
-                    style: cardFont(f.title, f.titleUpper ? 30 : 36, color: onBanner, weight: FontWeight.w700, height: 1.1),
+                    style: cardFont(
+                      f.title,
+                      f.titleUpper ? 30 : 36,
+                      color: onBanner,
+                      weight: FontWeight.w700,
+                      height: 1.1,
+                    ),
                   ),
                 ],
               ),
@@ -390,17 +407,16 @@ TextStyle cardFont(
   double? height,
   double letterSpacing = 0,
   bool italic = false,
-}) =>
-    TextStyle(
-      fontFamily: family,
-      fontSize: size,
-      color: color,
-      fontWeight: weight,
-      fontVariations: [FontVariation.weight(weight.value.toDouble())],
-      height: height,
-      letterSpacing: letterSpacing,
-      fontStyle: italic ? FontStyle.italic : FontStyle.normal,
-    );
+}) => TextStyle(
+  fontFamily: family,
+  fontSize: size,
+  color: color,
+  fontWeight: weight,
+  fontVariations: [FontVariation.weight(weight.value.toDouble())],
+  height: height,
+  letterSpacing: letterSpacing,
+  fontStyle: italic ? FontStyle.italic : FontStyle.normal,
+);
 
 class _Divider extends StatelessWidget {
   const _Divider({required this.color});
@@ -408,16 +424,16 @@ class _Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(width: 60, height: 1, color: color),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Transform.rotate(angle: 0.785, child: Container(width: 7, height: 7, color: color)),
-          ),
-          Container(width: 60, height: 1, color: color),
-        ],
-      );
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(width: 60, height: 1, color: color),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Transform.rotate(angle: 0.785, child: Container(width: 7, height: 7, color: color)),
+      ),
+      Container(width: 60, height: 1, color: color),
+    ],
+  );
 }
 
 class _BannerPainter extends CustomPainter {

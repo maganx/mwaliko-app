@@ -78,9 +78,15 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Text(event.title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontFamily: 'PlayfairDisplay', fontWeight: FontWeight.w700)),
+                Text(
+                  event.title,
+                  style: Theme.of(context).textTheme.headlineSmall
+                      ?.copyWith(fontFamily: 'PlayfairDisplay', fontWeight: FontWeight.w700),
+                ),
                 const SizedBox(height: 4),
-                Text('${eventTypeById(event.eventType).label} · ${swahiliDate(event.eventDate)} · ${swahiliTime(event.eventDate)}'),
+                Text(
+                  '${eventTypeById(event.eventType).label} · ${swahiliDate(event.eventDate)} · ${swahiliTime(event.eventDate)}',
+                ),
                 if (event.venue != null) Text(event.venue!),
                 const SizedBox(height: 16),
                 _StatsRow(stats: stats),
@@ -96,7 +102,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           event: event,
                           config: event.cardConfig,
                           customImageProvider: event.cardConfig.isCustom
-                              ? NetworkImage(const CardsRepository().publicUrl(event.cardConfig.customImagePath!))
+                              ? const CardsRepository().imageFor(event.cardConfig.customImagePath!)
                               : null,
                         ),
                       ),
@@ -106,8 +112,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(event.cardConfig.isCustom ? 'Design yako mwenyewe' : 'Template ya Mwaliko',
-                              style: const TextStyle(fontWeight: FontWeight.w600)),
+                          Text(
+                            event.cardConfig.isCustom ? 'Design yako mwenyewe' : 'Template ya Mwaliko',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
                           const SizedBox(height: 4),
                           const Text('Badilisha design, tengeneza mpya au pakia kadi yako.'),
                           const SizedBox(height: 8),
@@ -156,21 +164,21 @@ class _StatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget cell(String label, int value, Color color) => Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            margin: const EdgeInsets.symmetric(horizontal: 3),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        margin: const EdgeInsets.symmetric(horizontal: 3),
+        decoration: BoxDecoration(color: color.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(14)),
+        child: Column(
+          children: [
+            Text(
+              '$value',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: color),
             ),
-            child: Column(
-              children: [
-                Text('$value', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: color)),
-                Text(label, style: const TextStyle(fontSize: 12)),
-              ],
-            ),
-          ),
-        );
+            Text(label, style: const TextStyle(fontSize: 12)),
+          ],
+        ),
+      ),
+    );
     return Row(
       children: [
         cell('Waalikwa', stats.guests, MwalikoColors.ink),
@@ -191,13 +199,13 @@ class _ActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-        margin: const EdgeInsets.only(bottom: 10),
-        child: ListTile(
-          leading: Icon(icon, color: MwalikoColors.maroon),
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-          subtitle: Text(subtitle),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: onTap,
-        ),
-      );
+    margin: const EdgeInsets.only(bottom: 10),
+    child: ListTile(
+      leading: Icon(icon, color: MwalikoColors.maroon),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+      subtitle: Text(subtitle),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onTap,
+    ),
+  );
 }

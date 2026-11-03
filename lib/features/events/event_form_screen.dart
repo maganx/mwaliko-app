@@ -128,15 +128,16 @@ class _EventFormScreenState extends State<EventFormScreen> {
                   DropdownButtonFormField<String>(
                     initialValue: _type,
                     decoration: const InputDecoration(labelText: 'Aina ya tukio'),
-                    items: [
-                      for (final t in eventTypes) DropdownMenuItem(value: t.id, child: Text(t.label)),
-                    ],
+                    items: [for (final t in eventTypes) DropdownMenuItem(value: t.id, child: Text(t.label))],
                     onChanged: (v) => setState(() => _type = v ?? _type),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _title,
-                    decoration: const InputDecoration(labelText: 'Jina la tukio', hintText: 'mf. Harusi ya Amani & Neema'),
+                    decoration: const InputDecoration(
+                      labelText: 'Jina la tukio',
+                      hintText: 'mf. Harusi ya Amani & Neema',
+                    ),
                     validator: (v) => (v == null || v.trim().isEmpty) ? 'Weka jina la tukio' : null,
                   ),
                   const SizedBox(height: 12),
@@ -169,7 +170,10 @@ class _EventFormScreenState extends State<EventFormScreen> {
                     decoration: const InputDecoration(labelText: 'Link ya Google Maps (si lazima)'),
                   ),
                   const SizedBox(height: 12),
-                  TextFormField(controller: _dress, decoration: const InputDecoration(labelText: 'Mavazi (si lazima)')),
+                  TextFormField(
+                    controller: _dress,
+                    decoration: const InputDecoration(labelText: 'Mavazi (si lazima)'),
+                  ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _contact,
@@ -184,10 +188,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
                     decoration: const InputDecoration(labelText: 'Ujumbe wa ziada kwenye kadi (si lazima)'),
                   ),
                   const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: _saving ? null : _save,
-                    child: Text(_saving ? 'Inahifadhi…' : 'Hifadhi'),
-                  ),
+                  FilledButton(onPressed: _saving ? null : _save, child: Text(_saving ? 'Inahifadhi…' : 'Hifadhi')),
                 ],
               ),
             ),

@@ -163,16 +163,7 @@ const fontPairs = <FontPair>[
 ];
 
 /// Mapambo yanayochorwa na `OrnamentPainter`.
-const ornamentIds = <String>[
-  'gold_frame',
-  'florals',
-  'kitenge',
-  'arch',
-  'stars',
-  'waves',
-  'confetti',
-  'deco',
-];
+const ornamentIds = <String>['gold_frame', 'florals', 'kitenge', 'arch', 'stars', 'waves', 'confetti', 'deco'];
 
 const ornamentNames = <String, String>{
   'gold_frame': 'Fremu ya Dhahabu',
@@ -201,12 +192,12 @@ class CardTemplate {
   final String layout;
 
   CardConfig apply(CardConfig base) => base.copyWith(
-        mode: CardMode.template,
-        paletteId: palette,
-        ornamentId: ornament,
-        fontPairId: fonts,
-        layoutId: layout,
-      );
+    mode: CardMode.template,
+    paletteId: palette,
+    ornamentId: ornament,
+    fontPairId: fonts,
+    layoutId: layout,
+  );
 }
 
 const curatedTemplates = <CardTemplate>[

@@ -54,12 +54,7 @@ class OrnamentPainter extends CustomPainter {
     canvas.drawRect(inner, _stroke(p.withValues(alpha: 0.7), 0.9));
 
     // Mapambo ya pembe nne
-    for (final corner in [
-      inner.topLeft,
-      inner.topRight,
-      inner.bottomLeft,
-      inner.bottomRight,
-    ]) {
+    for (final corner in [inner.topLeft, inner.topRight, inner.bottomLeft, inner.bottomRight]) {
       final sx = corner.dx < s.width / 2 ? 1.0 : -1.0;
       final sy = corner.dy < s.height / 2 ? 1.0 : -1.0;
       canvas.save();
@@ -357,7 +352,10 @@ class OrnamentPainter extends CustomPainter {
       ..lineTo(m + st, m + st)
       ..close();
     canvas.drawPath(path, _stroke(p, 1.6));
-    canvas.drawRect(Rect.fromLTWH(m + 8, m + 8, w - 2 * m - 16, h - 2 * m - 16), _stroke(p.withValues(alpha: 0.5), 0.8));
+    canvas.drawRect(
+      Rect.fromLTWH(m + 8, m + 8, w - 2 * m - 16, h - 2 * m - 16),
+      _stroke(p.withValues(alpha: 0.5), 0.8),
+    );
     // miale chini (kioo cha juu)
     canvas.save();
     canvas.translate(0, h);

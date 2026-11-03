@@ -131,7 +131,9 @@ class _SendScreenState extends State<SendScreen> {
                 CheckboxListTile(
                   contentPadding: EdgeInsets.zero,
                   value: _channels.contains(c),
-                  onChanged: _sending ? null : (v) => setState(() => v == true ? _channels.add(c) : _channels.remove(c)),
+                  onChanged: _sending
+                      ? null
+                      : (v) => setState(() => v == true ? _channels.add(c) : _channels.remove(c)),
                   title: Text(c.label),
                   subtitle: Text(switch (c) {
                     Channel.sms => 'Ujumbe mfupi wenye link ya kadi na RSVP',
@@ -179,10 +181,7 @@ class _SendScreenState extends State<SendScreen> {
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: [
-                    for (final e in byStatus.entries)
-                      Chip(label: Text('${_statusLabel(e.key)}: ${e.value}')),
-                  ],
+                  children: [for (final e in byStatus.entries) Chip(label: Text('${_statusLabel(e.key)}: ${e.value}'))],
                 ),
               const SizedBox(height: 8),
               for (final d in deliveries.take(30))
@@ -194,7 +193,9 @@ class _SendScreenState extends State<SendScreen> {
                     color: d.status == 'failed' ? Colors.red : Colors.green,
                   ),
                   title: Text(guests.where((g) => g.id == d.guestId).firstOrNull?.name ?? '—'),
-                  subtitle: Text('${d.channel.toUpperCase()} · ${_statusLabel(d.status)}${d.error != null ? '\n${d.error}' : ''}'),
+                  subtitle: Text(
+                    '${d.channel.toUpperCase()} · ${_statusLabel(d.status)}${d.error != null ? '\n${d.error}' : ''}',
+                  ),
                 ),
             ],
           );
@@ -204,11 +205,11 @@ class _SendScreenState extends State<SendScreen> {
   }
 
   static String _statusLabel(String s) => switch (s) {
-        'queued' => 'Kwenye foleni',
-        'sent' => 'Imetumwa',
-        'delivered' => 'Imefika',
-        'read' => 'Imesomwa',
-        'failed' => 'Imeshindikana',
-        _ => s,
-      };
+    'queued' => 'Kwenye foleni',
+    'sent' => 'Imetumwa',
+    'delivered' => 'Imefika',
+    'read' => 'Imesomwa',
+    'failed' => 'Imeshindikana',
+    _ => s,
+  };
 }
