@@ -9,6 +9,7 @@ import '../../data/cards_repository.dart';
 import '../../data/guests_repository.dart';
 import '../../models/guest.dart';
 import '../../widgets/async_view.dart';
+import '../../widgets/ui.dart';
 import 'contacts_picker_screen.dart';
 import 'guest_import.dart';
 
@@ -24,6 +25,7 @@ class _GuestsScreenState extends State<GuestsScreen> {
   final _repo = const GuestsRepository();
   late Future<List<Guest>> _future = _repo.list(widget.eventId);
   String _query = '';
+  RsvpStatus? _status;
 
   void _reload() => setState(() => _future = _repo.list(widget.eventId));
 
@@ -116,159 +118,254 @@ class _GuestsScreenState extends State<GuestsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Waalikwa'),
-        actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.person_add_alt_1),
-            tooltip: 'Ongeza waalikwa',
-            onSelected: (v) => switch (v) {
-              'one' => _addOrEdit(),
-              'contacts' => _fromContacts(),
-              _ => _fromFile(),
-            },
-            itemBuilder: (_) => const [
-              PopupMenuItem(
-                value: 'one',
-                child: ListTile(leading: Icon(Icons.person_add), title: Text('Mmoja mmoja')),
-              ),
-              PopupMenuItem(
-                value: 'contacts',
-                child: ListTile(leading: Icon(Icons.contacts), title: Text('Kutoka contacts')),
-              ),
-              PopupMenuItem(
-                value: 'file',
-                child: ListTile(leading: Icon(Icons.table_chart), title: Text('Kutoka Excel / CSV')),
-              ),
-            ],
-          ),
-        ],
+      appBar: AppBar(title: const Text('Waalikwa')),
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'add-guest',
+        onPressed: () => _addOrEdit(),
+        icon: const Icon(Icons.person_add_alt_1),
+        label: const Text('Mwalikwa'),
       ),
       body: AsyncView(
         future: _future,
         onRetry: _reload,
         builder: (context, guests) {
-          if (guests.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Text(
-                  'Bado hakuna waalikwa.\nBonyeza kitufe cha juu kulia kuongeza kutoka contacts, Excel au mmoja mmoja.\n\n'
-                  'Excel iwe na safu: Jina, Simu, Email, Idadi',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            );
-          }
-          final filtered = guests
-              .where((g) => _query.isEmpty || g.name.toLowerCase().contains(_query) || (g.phone ?? '').contains(_query))
-              .toList();
+          final q = _query;
+          final filtered = guests.where((g) {
+            final matches = q.isEmpty || g.name.toLowerCase().contains(q) || (g.phone ?? '').contains(q);
+            return matches && (_status == null || g.rsvpStatus == _status);
+          }).toList();
           final seats = guests.fold<int>(0, (s, g) => s + g.seats);
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
-                child: TextField(
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search),
-                    hintText: 'Tafuta (${guests.length} waalikwa, viti $seats)',
-                  ),
-                  onChanged: (v) => setState(() => _query = v.toLowerCase().trim()),
+          final notCharged = guests.where((g) => g.chargedAt == null).length;
+          int count(RsvpStatus s) => guests.where((g) => g.rsvpStatus == s).length;
+
+          return RefreshIndicator(
+            onRefresh: () async => _reload(),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
+              children: [
+                Row(
+                  children: [
+                    _ImportButton(icon: Icons.contacts_outlined, label: 'Contacts', onTap: _fromContacts),
+                    const SizedBox(width: 10),
+                    _ImportButton(icon: Icons.table_chart_outlined, label: 'Excel / CSV', onTap: _fromFile),
+                    const SizedBox(width: 10),
+                    _ImportButton(icon: Icons.person_add_outlined, label: 'Mmoja', onTap: () => _addOrEdit()),
+                  ],
                 ),
-              ),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () async => _reload(),
-                  child: ListView.builder(
-                    itemCount: filtered.length,
-                    itemBuilder: (_, i) {
-                      final g = filtered[i];
-                      return Dismissible(
-                        key: ValueKey(g.id),
-                        direction: DismissDirection.endToStart,
-                        background: Container(
-                          color: Colors.red.shade400,
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.only(right: 24),
-                          child: const Icon(Icons.delete, color: Colors.white),
-                        ),
-                        confirmDismiss: (_) async =>
-                            await showDialog<bool>(
-                              context: context,
-                              builder: (c) => AlertDialog(
-                                title: Text('Futa ${g.name}?'),
-                                actions: [
-                                  TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Hapana')),
-                                  FilledButton(onPressed: () => Navigator.pop(c, true), child: const Text('Futa')),
-                                ],
-                              ),
-                            ) ??
-                            false,
-                        onDismissed: (_) => _delete(g),
-                        child: ListTile(
-                          onTap: () => _addOrEdit(g),
-                          leading: CircleAvatar(
-                            backgroundColor: MwalikoColors.maroon.withValues(alpha: 0.1),
-                            child: Text(
-                              g.name.characters.first.toUpperCase(),
-                              style: const TextStyle(color: MwalikoColors.maroon),
+                const SizedBox(height: 16),
+                if (guests.isEmpty)
+                  const SoftCard(
+                    child: EmptyState(
+                      icon: Icons.people_alt_outlined,
+                      title: 'Bado hakuna waalikwa',
+                      message: 'Ongeza kutoka contacts za simu, faili la Excel (safu: Jina, Simu, Email, Idadi) au mmoja mmoja.',
+                    ),
+                  )
+                else ...[
+                  SoftCard(
+                    child: Row(
+                      children: [
+                        _Mini(value: guests.length, label: 'Waalikwa'),
+                        _Mini(value: seats, label: 'Viti'),
+                        _Mini(value: count(RsvpStatus.attending), label: 'Watakuja', color: MwalikoColors.success),
+                        _Mini(value: notCharged, label: 'Hawajatozwa', color: MwalikoColors.warning),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Tafuta jina au simu'),
+                    onChanged: (v) => setState(() => _query = v.toLowerCase().trim()),
+                  ),
+                  const SizedBox(height: 10),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (final s in <RsvpStatus?>[null, ...RsvpStatus.values])
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: ChoiceChip(
+                              showCheckmark: false,
+                              label: Text(s == null ? 'Wote ${guests.length}' : '${s.label} ${count(s)}'),
+                              selected: _status == s,
+                              onSelected: (_) => setState(() => _status = s),
                             ),
                           ),
-                          title: Text(g.name),
-                          subtitle: Text(
-                            [
-                              if (g.phone != null) formatPhone(g.phone),
-                              if (g.phone == null && g.email != null) g.email!,
-                              if (g.seats > 1) 'watu ${g.seats}',
-                            ].join(' · '),
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _RsvpChip(status: g.rsvpStatus, checkedIn: g.checkedInAt != null),
-                              IconButton(
-                                tooltip: 'Shiriki kadi',
-                                icon: Icon(Icons.share, color: g.cardPath == null ? Colors.grey : MwalikoColors.maroon),
-                                onPressed: () => _share(g),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                      ],
+                    ),
                   ),
-                ),
-              ),
-            ],
+                  const SizedBox(height: 12),
+                  if (filtered.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Text(
+                        'Hakuna anayelingana na utafutaji.',
+                        textAlign: TextAlign.center,
+                        style: t.bodyMedium,
+                      ),
+                    )
+                  else
+                    SoftCard(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Column(
+                        children: [
+                          for (final (i, g) in filtered.indexed) ...[
+                            if (i > 0) const Divider(indent: 70, endIndent: 16),
+                            _GuestRow(
+                              guest: g,
+                              onTap: () => _addOrEdit(g),
+                              onShare: () => _share(g),
+                              onDelete: () => _confirmDelete(g),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                ],
+              ],
+            ),
           );
         },
       ),
     );
   }
+
+  Future<void> _confirmDelete(Guest g) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text('Futa ${g.name}?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Hapana')),
+          FilledButton(
+            style: FilledButton.styleFrom(minimumSize: const Size(0, 44), backgroundColor: MwalikoColors.danger),
+            onPressed: () => Navigator.pop(c, true),
+            child: const Text('Futa'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) await _delete(g);
+  }
 }
 
-class _RsvpChip extends StatelessWidget {
-  const _RsvpChip({required this.status, required this.checkedIn});
-  final RsvpStatus status;
-  final bool checkedIn;
+class _ImportButton extends StatelessWidget {
+  const _ImportButton({required this.icon, required this.label, required this.onTap});
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+    child: SoftCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+      child: Column(
+        children: [
+          IconBadge(icon, size: 38),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _Mini extends StatelessWidget {
+  const _Mini({required this.value, required this.label, this.color = MwalikoColors.ink});
+  final int value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+    child: Column(
+      children: [
+        Text(
+          '$value',
+          style: TextStyle(fontFamily: 'PlayfairDisplay', fontSize: 22, fontWeight: FontWeight.w700, color: color),
+        ),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(label, maxLines: 1, style: Theme.of(context).textTheme.bodySmall),
+        ),
+      ],
+    ),
+  );
+}
+
+class _GuestRow extends StatelessWidget {
+  const _GuestRow({required this.guest, required this.onTap, required this.onShare, required this.onDelete});
+  final Guest guest;
+  final VoidCallback onTap;
+  final VoidCallback onShare;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
-    final (label, color) = checkedIn
-        ? ('Ameingia', MwalikoColors.maroon)
-        : switch (status) {
-            RsvpStatus.attending => (status.label, Colors.green.shade700),
-            RsvpStatus.declined => (status.label, Colors.red.shade700),
-            RsvpStatus.maybe => (status.label, Colors.orange.shade800),
-            RsvpStatus.pending => (status.label, Colors.grey.shade600),
+    final g = guest;
+    final t = Theme.of(context).textTheme;
+    final (label, color) = g.checkedInAt != null
+        ? ('Ameingia', MwalikoColors.plum)
+        : switch (g.rsvpStatus) {
+            RsvpStatus.attending => (g.rsvpStatus.label, MwalikoColors.success),
+            RsvpStatus.declined => (g.rsvpStatus.label, MwalikoColors.danger),
+            RsvpStatus.maybe => (g.rsvpStatus.label, MwalikoColors.warning),
+            RsvpStatus.pending => (g.rsvpStatus.label, MwalikoColors.muted),
           };
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-      child: Text(
-        label,
-        style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600),
+    return ListTile(
+      onTap: onTap,
+      contentPadding: const EdgeInsets.only(left: 14, right: 4),
+      leading: InitialsAvatar(g.name),
+      title: Text(g.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: t.titleSmall),
+      subtitle: Text(
+        [
+          if (g.phone != null) formatPhone(g.phone),
+          if (g.phone == null && g.email != null) g.email!,
+          if (g.category != null) g.category!,
+          if (g.seats > 1) 'watu ${g.seats}',
+        ].join(' · '),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: t.bodySmall,
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          StatusChip(label, color: color),
+          PopupMenuButton<String>(
+            tooltip: 'Zaidi',
+            icon: const Icon(Icons.more_vert, color: MwalikoColors.muted),
+            onSelected: (v) => switch (v) {
+              'share' => onShare(),
+              'edit' => onTap(),
+              _ => onDelete(),
+            },
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                value: 'share',
+                enabled: g.cardPath != null,
+                child: const ListTile(leading: Icon(Icons.share_outlined), title: Text('Shiriki kadi')),
+              ),
+              const PopupMenuItem(
+                value: 'edit',
+                child: ListTile(leading: Icon(Icons.edit_outlined), title: Text('Hariri')),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: ListTile(leading: Icon(Icons.delete_outline), title: Text('Futa')),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -316,7 +413,7 @@ class _GuestFormState extends State<_GuestForm> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.viewInsetsOf(context).bottom),
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + MediaQuery.viewInsetsOf(context).bottom),
       child: Form(
         key: _form,
         child: Column(
@@ -325,9 +422,9 @@ class _GuestFormState extends State<_GuestForm> {
           children: [
             Text(
               widget.existing == null ? 'Mwalikwa mpya' : 'Hariri mwalikwa',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _name,
               textCapitalization: TextCapitalization.words,

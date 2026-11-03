@@ -1,20 +1,23 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/config.dart';
 import 'core/theme.dart';
-import 'features/auth/login_screen.dart';
+import 'data/auth_repository.dart';
+import 'features/account/account_screen.dart';
+import 'features/account/admin_payments_screen.dart';
+import 'features/auth/auth_screen.dart';
 import 'features/cards/card_studio_screen.dart';
 import 'features/checkin/checkin_screen.dart';
 import 'features/events/event_detail_screen.dart';
 import 'features/events/event_form_screen.dart';
 import 'features/events/events_screen.dart';
 import 'features/guests/guests_screen.dart';
+import 'features/home/app_shell.dart';
+import 'features/home/home_screen.dart';
 import 'features/send/send_screen.dart';
+import 'features/wallet/wallet_screen.dart';
 
 class MwalikoApp extends StatefulWidget {
   const MwalikoApp({super.key});
@@ -49,25 +52,46 @@ class _MwalikoAppState extends State<MwalikoApp> {
 }
 
 GoRouter _buildRouter() {
-  if (AppConfig.demo) return GoRouter(initialLocation: '/', routes: _routes);
-  final auth = Supabase.instance.client.auth;
+  final auth = AuthRepository.instance;
   return GoRouter(
     initialLocation: '/',
-    refreshListenable: _AuthListenable(auth.onAuthStateChange),
-    routes: _routes,
+    refreshListenable: auth,
     redirect: (context, state) {
-      final loggedIn = auth.currentSession != null;
       final atLogin = state.matchedLocation == '/login';
-      if (!loggedIn && !atLogin) return '/login';
-      if (loggedIn && atLogin) return '/';
+      if (!auth.isSignedIn) return atLogin ? null : '/login';
+      if (atLogin) return '/';
       return null;
     },
+    routes: _routes,
   );
 }
 
 final _routes = <RouteBase>[
-  GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
-  GoRoute(path: '/', builder: (_, _) => const EventsScreen()),
+  GoRoute(path: '/login', builder: (_, _) => const AuthScreen()),
+  // Tabo nne za chini (kila moja inakumbuka hali yake)
+  StatefulShellRoute.indexedStack(
+    builder: (_, _, shell) => AppShell(shell: shell),
+    branches: [
+      StatefulShellBranch(
+        routes: [GoRoute(path: '/', builder: (_, _) => const HomeScreen())],
+      ),
+      StatefulShellBranch(
+        routes: [GoRoute(path: '/events', builder: (_, _) => const EventsScreen())],
+      ),
+      StatefulShellBranch(
+        routes: [GoRoute(path: '/wallet', builder: (_, _) => const WalletScreen())],
+      ),
+      StatefulShellBranch(
+        routes: [GoRoute(path: '/account', builder: (_, _) => const AccountScreen())],
+      ),
+    ],
+  ),
+  // Skrini kamili (juu ya tabo)
+  GoRoute(
+    path: '/topup',
+    builder: (_, s) => WalletScreen(need: int.tryParse(s.uri.queryParameters['need'] ?? '')),
+  ),
+  GoRoute(path: '/admin/payments', builder: (_, _) => const AdminPaymentsScreen()),
   GoRoute(path: '/events/new', builder: (_, _) => const EventFormScreen()),
   GoRoute(
     path: '/events/:id',
@@ -96,19 +120,6 @@ final _routes = <RouteBase>[
     ],
   ),
 ];
-
-class _AuthListenable extends ChangeNotifier {
-  _AuthListenable(Stream<AuthState> stream) {
-    _sub = stream.listen((_) => notifyListeners());
-  }
-  late final StreamSubscription<AuthState> _sub;
-
-  @override
-  void dispose() {
-    _sub.cancel();
-    super.dispose();
-  }
-}
 
 /// Ukanda mdogo juu unaoonyesha kuwa hili ni toleo la majaribio.
 class _DemoFrame extends StatelessWidget {

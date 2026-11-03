@@ -6,8 +6,10 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../core/config.dart';
 import '../../core/swahili_time.dart';
+import '../../core/theme.dart';
 import '../../data/guests_repository.dart';
 import '../../widgets/async_view.dart';
+import '../../widgets/ui.dart';
 
 /// Kuskani QR ya kadi mlangoni na kumwandikisha mwalikwa kuwa ameingia.
 class CheckinScreen extends StatefulWidget {
@@ -48,28 +50,28 @@ class _CheckinScreenState extends State<CheckinScreen> {
     _busy = true;
     try {
       if (!raw.startsWith('MWALIKO:')) {
-        await _result(icon: Icons.help_outline, color: Colors.orange, title: 'Si kadi ya Mwaliko');
+        await _result(icon: Icons.help_outline, color: MwalikoColors.warning, title: 'Si kadi ya Mwaliko');
         return;
       }
       final guest = await _repo.findByToken(widget.eventId, raw.substring('MWALIKO:'.length));
       if (guest == null) {
         await _result(
           icon: Icons.block,
-          color: Colors.red,
+          color: MwalikoColors.danger,
           title: 'Kadi haitambuliki',
           body: 'Kadi hii si ya tukio hili.',
         );
       } else if (guest.checkedInAt != null) {
         await _result(
           icon: Icons.warning_amber_rounded,
-          color: Colors.orange,
+          color: MwalikoColors.warning,
           title: '${guest.name} ameshaingia',
           body: 'Aliingia ${swahiliTime(guest.checkedInAt!)}. Kadi hii imeshatumika.',
         );
       } else {
         final admit = await _result(
           icon: Icons.verified,
-          color: Colors.green,
+          color: MwalikoColors.success,
           title: guest.name,
           body:
               'Watu ${guest.rsvpSeats ?? guest.seats}${guest.category != null ? ' · ${guest.category}' : ''}\n'
@@ -131,7 +133,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
               width: 240,
               height: 240,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.white, width: 3),
+                border: Border.all(color: MwalikoColors.gold, width: 3),
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
@@ -140,9 +142,9 @@ class _CheckinScreenState extends State<CheckinScreen> {
             left: 16,
             right: 16,
             bottom: 32,
-            child: Card(
+            child: SoftCard(
               child: Padding(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(2),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [

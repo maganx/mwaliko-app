@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import '../models/billing.dart';
+
 /// Data ya mfano kwa "demo mode" (flutter run --dart-define=DEMO=true).
 /// Kila kitu kinakaa kwenye kumbukumbu ya app tu; hakuna kinachotumwa kwa Supabase
 /// wala kwa watoa huduma wa SMS/WhatsApp/email.
@@ -15,6 +17,91 @@ class DemoStore {
   final guests = <String, Map<String, dynamic>>{};
   final deliveries = <Map<String, dynamic>>[];
   final files = <String, Uint8List>{};
+
+  // --- Akaunti na salio -------------------------------------------------------
+  /// Mteja aliyeingia (null = hajaingia). Demo inamfanya admin ili skrini ya admin ionekane.
+  Map<String, dynamic>? signedInUser;
+  int credits = 24;
+  final transactions = <Map<String, dynamic>>[];
+  final payments = <Map<String, dynamic>>[];
+  static const pricePerGuest = 3000;
+
+  void signIn({required String email, String? fullName, String? businessName, String? phone}) {
+    signedInUser = {
+      'id': 'demo',
+      'email': email.trim(),
+      'full_name': fullName ?? 'Asha Mohamed',
+      'business_name': businessName ?? 'Asha Events & Decor',
+      'phone': phone ?? '255713100200',
+      'role': 'admin',
+    };
+  }
+
+  Map<String, dynamic> _payment(
+    String userId,
+    int credits,
+    String method,
+    String status, {
+    String? phone,
+    String? reference,
+    Map<String, dynamic>? profile,
+    DateTime? at,
+  }) => {
+    'id': newId(),
+    'user_id': userId,
+    'credits': credits,
+    'amount': credits * pricePerGuest,
+    'method': method,
+    'phone': phone,
+    'reference': reference,
+    'status': status,
+    'created_at': (at ?? DateTime.now()).toUtc().toIso8601String(),
+    'profiles': ?profile,
+  };
+
+  Map<String, dynamic> purchase({required int credits, required String method, String? phone, String? reference}) {
+    if (credits < 10) throw ArgumentError('Kima cha chini ni mialiko 10');
+    final p = _payment('demo', credits, method, 'pending', phone: phone, reference: reference);
+    payments.insert(0, p);
+    confirmPayment(p['id'] as String); // demo: inathibitishwa moja kwa moja
+    return p;
+  }
+
+  void confirmPayment(String id) {
+    final p = payments.firstWhere((p) => p['id'] == id);
+    if (p['status'] != 'pending') return;
+    p['status'] = 'paid';
+    if (p['user_id'] == 'demo') {
+      credits += p['credits'] as int;
+      transactions.insert(0, {
+        'kind': 'purchase',
+        'credits': p['credits'],
+        'amount': p['amount'],
+        'note': 'Umenunua mialiko ${p['credits']}',
+        'created_at': now(),
+      });
+    }
+  }
+
+  /// Inakata salio kwa waalikwa ambao hawajawahi kutozwa. Inarudisha idadi iliyotozwa.
+  int consume(String eventId, List<String> guestIds) {
+    final uncharged = guestIds.where((id) => guests[id]?['charged_at'] == null).toList();
+    if (uncharged.isEmpty) return 0;
+    if (credits < uncharged.length) {
+      throw InsufficientCreditsException(needed: uncharged.length, balance: credits);
+    }
+    credits -= uncharged.length;
+    for (final id in uncharged) {
+      guests[id]!['charged_at'] = now();
+    }
+    transactions.insert(0, {
+      'kind': 'usage',
+      'credits': -uncharged.length,
+      'note': 'Mialiko ${uncharged.length} imetumwa',
+      'created_at': now(),
+    });
+    return uncharged.length;
+  }
 
   final _rng = Random(2026);
 
@@ -119,8 +206,38 @@ class DemoStore {
     for (final p in people.take(4)) {
       addGuest({'event_id': sendoff['id'], 'name': p.$1, 'phone': p.$2, 'seats': 1, 'category': p.$6});
     }
+    // historia ya salio ya mfano
+    final bought = DateTime.now().subtract(const Duration(days: 3));
+    payments.add(_payment('demo', 30, 'mpesa', 'paid', phone: '255713100200', reference: 'SKD81HQ2P1', at: bought));
+    transactions.add({
+      'kind': 'purchase',
+      'credits': 30,
+      'amount': 30 * pricePerGuest,
+      'note': 'Umenunua mialiko 30',
+      'created_at': bought.toUtc().toIso8601String(),
+    });
+    transactions.insert(0, {
+      'kind': 'usage',
+      'credits': -6,
+      'note': 'Mialiko 6 imetumwa',
+      'created_at': DateTime.now().subtract(const Duration(days: 2)).toUtc().toIso8601String(),
+    });
+    // ombi la malipo la mteja mwingine, linasubiri admin
+    payments.add(
+      _payment(
+        'other',
+        200,
+        'mixx',
+        'pending',
+        phone: '255754300400',
+        reference: 'MX7719203',
+        profile: {'business_name': 'Neema Wedding Planners'},
+      ),
+    );
+
     // historia ya utumaji ya mfano
     for (final g in guests.values.where((g) => g['event_id'] == harusi['id']).take(6)) {
+      g['charged_at'] = now();
       deliveries.add({
         'event_id': harusi['id'],
         'guest_id': g['id'],

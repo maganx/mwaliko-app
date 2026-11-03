@@ -12,6 +12,7 @@ class Guest {
     this.rsvpToken,
     this.cardPath,
     this.checkedInAt,
+    this.chargedAt,
   });
 
   final String? id;
@@ -26,6 +27,9 @@ class Guest {
   final String? rsvpToken;
   final String? cardPath;
   final DateTime? checkedInAt;
+
+  /// Ametozwa (salio limekatwa) lini. Kumtumia tena hakumtozi.
+  final DateTime? chargedAt;
 
   /// Data iliyo ndani ya QR code ya kadi (inaskaniwa mlangoni).
   String get qrData => 'MWALIKO:${rsvpToken ?? ''}';
@@ -43,6 +47,7 @@ class Guest {
     rsvpToken: j['rsvp_token'] as String?,
     cardPath: j['card_path'] as String?,
     checkedInAt: j['checked_in_at'] == null ? null : DateTime.parse(j['checked_in_at'] as String).toLocal(),
+    chargedAt: j['charged_at'] == null ? null : DateTime.parse(j['charged_at'] as String).toLocal(),
   );
 
   /// Sehemu zinazoweza kuandikwa na app (token/rsvp zinawekwa na database).

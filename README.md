@@ -1,7 +1,8 @@
 # Mwaliko
 
 App ya simu (iOS na Android) ya kusimamia mialiko ya matukio: harusi, send-off, kitchen party,
-mahafali, siku ya kuzaliwa na matukio ya kikazi.
+mahafali, siku ya kuzaliwa na matukio ya kikazi. Ni huduma ya SaaS: kila mteja anafungua akaunti yake,
+ananunua salio la mialiko na kusimamia matukio yake mwenyewe.
 
 - Tengeneza kadi nzuri kutoka template 12, au acha app ikutengenezee design mpya (michanganyiko 2,000+).
 - Pakia design yako mwenyewe, kisha weka jina la mwalikwa na QR code mahali unapotaka.
@@ -9,23 +10,64 @@ mahafali, siku ya kuzaliwa na matukio ya kikazi.
 - Tuma kwa **SMS** (Beem Africa au Africa's Talking), **WhatsApp** (Cloud API ya Meta) na **email** (Resend),
   au shiriki kadi moja moja kupitia WhatsApp ya kawaida bila gharama ya API.
 - Waalikwa wanathibitisha kuhudhuria (RSVP) kupitia link, na mlangoni QR inaskaniwa (check-in).
+- Akaunti za wateja (email + nenosiri), salio la mialiko lililolipiwa kabla, na admin anayethibitisha malipo.
+
+## Bei na salio
+
+| | |
+|---|---|
+| Bei | **TSh 3,000 kwa mwalikwa** (tukio la watu 200 = TSh 600,000) |
+| Kima cha chini | mialiko 10 (TSh 30,000) |
+| Vifurushi | 10, 50, 100, 200, 500, au idadi yoyote kuanzia 10 |
+
+- Mwaliko 1 = mwalikwa 1. Mwalikwa anatozwa **mara moja tu**, hata akitumiwa kwa SMS, WhatsApp na email zote,
+  na kumtumia tena ni bure. Ukibadilisha simu au email yake, atatozwa tena atakapotumiwa.
+- Mwalikwa asiye na simu/email kwa njia ulizochagua hatozwi.
+- Salio linakatwa na database (`consume_credits`) kabla ujumbe haujatumwa; likipungua, hakuna kinachotumwa
+  (function inarudisha HTTP 402 na app inamwonyesha mteja kitufe cha kuongeza salio).
+- Bei zote ziko kwenye jedwali `pricing` (safu moja), kwa hiyo unaweza kubadilisha bei, kima cha chini,
+  vifurushi na maelekezo ya malipo bila kubadilisha app:
+  ```sql
+  update public.pricing set price_per_guest = 2500, min_purchase = 20,
+    packages = '{20,100,200,500}', payment_instructions = 'Lipa kwa Lipa Namba 123456 ...' where id = 1;
+  ```
+
+### Malipo (kwa sasa ni ya mkono)
+
+1. Mteja anachagua kifurushi kwenye **Salio**, analipa kwa M-Pesa / Mixx by Yas / Airtel Money / HaloPesa / benki,
+   kisha anaweka namba ya muamala. Ombi linaingia kwenye `payments` likiwa `pending`.
+2. Admin anafungua **Akaunti > Thibitisha malipo**, analinganisha na SMS ya muamala, kisha anabonyeza
+   **Thibitisha** (salio la mteja linaongezwa) au **Kataa**.
+3. Kumfanya mtu admin (SQL editor ya Supabase):
+   ```sql
+   update public.profiles set role = 'admin'
+    where id = (select id from auth.users where email = 'wewe@domain.co.tz');
+   ```
+
+Baadaye, gateway (mf. Selcom, AzamPay au ClickPesa) inaweza kuita `confirm_payment` kupitia webhook
+kwa `service_role`, ili malipo yathibitishwe moja kwa moja.
 
 ## Muundo
 
 ```
 lib/
-  core/        mipangilio, namba za simu, saa za Kiswahili, theme
-  models/      EventModel, Guest, CardConfig
-  data/        repositories za Supabase (matukio, waalikwa, kadi, utumaji)
+  core/        mipangilio, namba za simu, fedha, saa za Kiswahili, theme
+  models/      EventModel, Guest, CardConfig, bei/salio/malipo
+  data/        repositories za Supabase (akaunti, salio, matukio, waalikwa, kadi, utumaji)
+  widgets/     vipande vya muonekano vinavyotumika kila mahali (kadi, kichwa, salio, RSVP)
   features/
-    auth/      kuingia kwa email + namba ya siri (OTP)
+    auth/      kuingia na kujisajili (email + nenosiri)
+    home/      dashibodi na menyu ya chini (Nyumbani, Matukio, Salio, Akaunti)
+    wallet/    salio, kununua mialiko, historia ya malipo na matumizi
+    account/   wasifu, bei, kutoka, na admin wa kuthibitisha malipo
     events/    orodha, fomu na ukurasa wa tukio
     guests/    waalikwa: mmoja mmoja, contacts, Excel/CSV, kushiriki kadi
     cards/     template, mapambo (CustomPainter), generator, studio, kutengeneza PNG
     send/      kutuma kwa SMS/WhatsApp/email na historia
     checkin/   kuskani QR mlangoni
 supabase/
-  migrations/  jedwali, RLS, RPC za RSVP, storage bucket "cards"
+  migrations/  jedwali, RLS, RPC za RSVP, storage bucket "cards", akaunti, salio na malipo
+  tests/       majaribio ya SQL ya salio (yanaendeshwa kwenye Postgres ya kawaida)
   functions/   send-invitations, whatsapp-webhook
 rsvp_web/      ukurasa wa RSVP (HTML moja) kwa waalikwa
 assets/fonts/  fonts za kadi (SIL Open Font License)
@@ -41,8 +83,9 @@ assets/fonts/  fonts za kadi (SIL Open Font License)
    supabase link --project-ref <PROJECT_REF>
    supabase db push
    ```
-3. Auth > Providers > Email: washa "Email OTP". Kwenye Email Templates > Magic Link, weka `{{ .Token }}`
-   ndani ya ujumbe ili mtumiaji apokee namba ya tarakimu 6.
+3. Auth > Providers > Email: iwe imewashwa (email + nenosiri). Ukiacha "Confirm email" ikiwa imewashwa,
+   mteja mpya atapokea email ya kuthibitisha kabla ya kuingia mara ya kwanza.
+4. Kila mteja anayejisajili anapata `profiles` na `wallets` (salio 0) moja kwa moja kupitia trigger.
 
 ### 2. Watoa huduma wa ujumbe
 
@@ -114,17 +157,27 @@ flutter run -d chrome --dart-define=DEMO=true        # kwenye kivinjari
 flutter build web --dart-define=DEMO=true --no-web-resources-cdn   # kujenga demo ya web
 ```
 
+Demo inaanza kwenye skrini ya kuingia (email na nenosiri vimeshajazwa). Mteja wa demo ni admin pia,
+ili uone skrini ya kuthibitisha malipo. Kununua salio kwenye demo kunathibitishwa moja kwa moja.
+
 ## Tests
 
 ```bash
 flutter analyze
 flutter test
 SAVE_CARDS=1 flutter test test/card_render_test.dart   # inahifadhi sampuli za kadi kwenye build/card_samples/
+
+# SQL ya salio (Postgres 15+ ya kawaida, si lazima Supabase)
+createdb mwtest
+psql -d mwtest -v ON_ERROR_STOP=1 -f supabase/tests/supabase_stub.sql \
+  -f supabase/migrations/20261103000000_init.sql -f supabase/migrations/20261103120000_saas_billing.sql \
+  -f supabase/tests/billing_test.sql
 ```
 
 ## Mambo ya kufuata baadaye
 
 - Login kwa namba ya simu (OTP kwa SMS).
-- Malipo (M-Pesa, Tigo Pesa, Airtel Money) kwa vifurushi vya SMS/WhatsApp.
+- Gateway ya malipo ili salio liongezwe bila admin (Selcom, AzamPay, ClickPesa n.k.).
+- Ukurasa wa admin wa kubadilisha bei ndani ya app.
 - Vikumbusho vya moja kwa moja siku chache kabla ya tukio.
 - Kutengeneza kadi upande wa server kwa orodha kubwa sana za waalikwa.
