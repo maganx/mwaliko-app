@@ -123,7 +123,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
         children: [
           if (AppConfig.demo && kIsWeb)
             const ColoredBox(
-              color: Color(0xFF222222),
+              color: MwalikoColors.ink,
               child: Center(child: Icon(Icons.qr_code_2, size: 120, color: Colors.white24)),
             )
           else
@@ -143,6 +143,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
             right: 16,
             bottom: 32,
             child: SoftCard(
+              color: Colors.white,
               child: Padding(
                 padding: const EdgeInsets.all(2),
                 child: Column(
@@ -151,6 +152,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
                     Text(
                       'Elekeza kamera kwenye QR ya kadi.\nWalioingia kwenye kifaa hiki: $_count',
                       textAlign: TextAlign.center,
+                      style: const TextStyle(color: MwalikoColors.ink, fontWeight: FontWeight.w500),
                     ),
                     if (AppConfig.demo) ...[
                       const SizedBox(height: 10),

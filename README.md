@@ -1,6 +1,6 @@
-# Mwaliko
+# U'r Invente (Mwaliko)
 
-App ya simu (iOS na Android) ya kusimamia mialiko ya matukio: harusi, send-off, kitchen party,
+**U'r Invente by Tembo Cloud**: app ya simu (iOS na Android) ya kusimamia mialiko ya matukio: harusi, send-off, kitchen party,
 mahafali, siku ya kuzaliwa na matukio ya kikazi. Ni huduma ya SaaS: kila mteja anafungua akaunti yake,
 ananunua salio la mialiko na kusimamia matukio yake mwenyewe.
 
@@ -46,6 +46,14 @@ ananunua salio la mialiko na kusimamia matukio yake mwenyewe.
 
 Baadaye, gateway (mf. Selcom, AzamPay au ClickPesa) inaweza kuita `confirm_payment` kupitia webhook
 kwa `service_role`, ili malipo yathibitishwe moja kwa moja.
+
+## Brand
+
+Muonekano ni **Aqua glass + orange** (angalia [assets/brand/BRAND.md](assets/brand/BRAND.md)):
+asili ya gradient ya aqua, kadi za glass nyeupe nusu-uwazi, vitufe vya orange `#FF7200`, na fonti
+Plus Jakarta Sans (vichwa) na Inter (maandishi). Rangi zote ziko kwenye `lib/core/brand_colors.dart`
+na zinatumika kupitia `MwalikoColors` kwenye `lib/core/theme.dart`. Ikoni ya app (Android, iOS, web)
+imetengenezwa kutoka `assets/brand/app-icon.png`.
 
 ## Muundo
 
