@@ -1,12 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 120" width="460" height="120">
-  <g>
-    <rect x="4" y="4" width="112" height="112" rx="30" fill="#0F766E"/>
-    <rect x="24" y="38" width="72" height="50" rx="10" fill="#FFF8F1"/>
-    <path d="M27 43 L60 68 L93 43" fill="none" stroke="#0F766E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M60 26 C56 19 46 21 47 29 C48 35 60 42 60 42 C60 42 72 35 73 29 C74 21 64 19 60 26 Z" fill="#FF6B5B"/>
-    <circle cx="92" cy="28" r="4" fill="#FFC857"/>
-    <circle cx="28" cy="27" r="3" fill="#CCFBF1"/>
-  </g>
-  <text x="138" y="72" font-family="'Plus Jakarta Sans', Inter, Arial, sans-serif" font-size="46" font-weight="800" fill="#FFF8F1" letter-spacing="-1">U’r <tspan fill="#5EEAD4">Invente</tspan></text>
-  <text x="140" y="100" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="500" fill="#94A3B8" letter-spacing="2.5">BY TEMBO CLOUD</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 120" width="470" height="120"><defs><linearGradient id="og" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF9A1F"/><stop offset="1" stop-color="#FF4F00"/></linearGradient><linearGradient id="tg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FF8A00"/><stop offset="1" stop-color="#FF4F00"/></linearGradient></defs><path d="M34 34 V66 a26 26 0 0 0 52 0 V34" fill="none" stroke="url(#og)" stroke-width="17" stroke-linecap="round"/><path d="M92 14 l4.5 10.5 l10.5 4.5 l-10.5 4.5 l-4.5 10.5 l-4.5 -10.5 l-10.5 -4.5 l10.5 -4.5z" fill="#5CD6CF"/><text x="128" y="74" font-family="'Plus Jakarta Sans', Inter, Arial, sans-serif" font-size="54" font-weight="800" fill="#FFFFFF" letter-spacing="-1.5">U’r <tspan fill="url(#tg)">Invente</tspan></text><text x="131" y="102" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700" fill="#A8F0E0" letter-spacing="3">BY TEMBO CLOUD</text></svg>
