@@ -230,7 +230,7 @@ class _SendScreenState extends State<SendScreen> {
                         subtitle: Text('Waalikwa ${_countFor(a, d)}', style: t.bodySmall),
                         trailing: Icon(
                           _audience == a ? Icons.radio_button_checked : Icons.radio_button_off,
-                          color: _audience == a ? MwalikoColors.plum : MwalikoColors.muted,
+                          color: _audience == a ? MwalikoColors.primary : MwalikoColors.muted,
                         ),
                       ),
                   ],
@@ -335,7 +335,7 @@ class _SendScreenState extends State<SendScreen> {
     'read' => MwalikoColors.success,
     'delivered' => MwalikoColors.success,
     'queued' => MwalikoColors.warning,
-    _ => MwalikoColors.plum,
+    _ => MwalikoColors.primary,
   };
 }
 
@@ -355,9 +355,9 @@ class _ChannelCard extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       decoration: BoxDecoration(
-        color: selected ? MwalikoColors.plum : MwalikoColors.surface,
+        color: selected ? MwalikoColors.primary : MwalikoColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: selected ? MwalikoColors.plum : MwalikoColors.line, width: 1.4),
+        border: Border.all(color: selected ? MwalikoColors.primary : MwalikoColors.line, width: 1.4),
         boxShadow: selected ? MwalikoShadows.soft : null,
       ),
       child: Material(
@@ -369,7 +369,7 @@ class _ChannelCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
             child: Column(
               children: [
-                Icon(icon, color: selected ? MwalikoColors.gold : MwalikoColors.plum),
+                Icon(icon, color: selected ? MwalikoColors.accent : MwalikoColors.primary),
                 const SizedBox(height: 6),
                 Text(
                   channel.label,
@@ -433,7 +433,7 @@ class _CostCard extends StatelessWidget {
               Expanded(child: Text('Gharama ya utumaji', style: t.titleMedium)),
               Text(
                 '${formatTzs(pricing.pricePerGuest)}/mtu',
-                style: t.bodySmall?.copyWith(color: MwalikoColors.plum, fontWeight: FontWeight.w600),
+                style: t.bodySmall?.copyWith(color: MwalikoColors.primary, fontWeight: FontWeight.w600),
               ),
             ],
           ),

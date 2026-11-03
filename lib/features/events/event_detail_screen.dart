@@ -97,7 +97,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 Text(
                                   eventTypeById(event.eventType).label.toUpperCase(),
                                   style: const TextStyle(
-                                    color: MwalikoColors.gold,
+                                    color: MwalikoColors.accent,
                                     fontSize: 11.5,
                                     letterSpacing: 1.6,
                                     fontWeight: FontWeight.w700,
@@ -122,7 +122,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: past ? Colors.white24 : MwalikoColors.gold,
+                                    color: past ? Colors.white24 : MwalikoColors.accent,
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
@@ -130,7 +130,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                     style: TextStyle(
                                       fontSize: 11.5,
                                       fontWeight: FontWeight.w700,
-                                      color: past ? Colors.white : MwalikoColors.plumDeep,
+                                      color: past ? Colors.white : MwalikoColors.primaryDeep,
                                     ),
                                   ),
                                 ),
@@ -164,7 +164,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 _Stat(value: stats.guests, label: 'Waalikwa', color: MwalikoColors.ink),
                                 _Stat(value: stats.attending, label: 'Watakuja', color: MwalikoColors.success),
                                 _Stat(value: stats.declined, label: 'Hawaji', color: MwalikoColors.danger),
-                                _Stat(value: stats.checkedIn, label: 'Wameingia', color: MwalikoColors.plum),
+                                _Stat(value: stats.checkedIn, label: 'Wameingia', color: MwalikoColors.primary),
                               ],
                             ),
                             const SizedBox(height: 16),
@@ -278,7 +278,7 @@ class _HeroLine extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 15, color: MwalikoColors.gold),
+        Icon(icon, size: 15, color: MwalikoColors.accent),
         const SizedBox(width: 8),
         Expanded(
           child: Text(text, style: TextStyle(color: Colors.white.withValues(alpha: 0.88), fontSize: 13)),
@@ -329,14 +329,14 @@ class _ActionCard extends StatelessWidget {
     final fg = highlight ? Colors.white : MwalikoColors.ink;
     return SoftCard(
       onTap: onTap,
-      color: highlight ? MwalikoColors.plum : null,
+      color: highlight ? MwalikoColors.primary : null,
       padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              IconBadge(icon, color: highlight ? MwalikoColors.gold : MwalikoColors.plum, size: 40),
+              IconBadge(icon, color: highlight ? MwalikoColors.accent : MwalikoColors.primary, size: 40),
               const Spacer(),
               Text(
                 '0$step',
@@ -344,7 +344,7 @@ class _ActionCard extends StatelessWidget {
                   fontFamily: 'PlayfairDisplay',
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: (highlight ? Colors.white : MwalikoColors.plum).withValues(alpha: 0.25),
+                  color: (highlight ? Colors.white : MwalikoColors.primary).withValues(alpha: 0.25),
                 ),
               ),
             ],

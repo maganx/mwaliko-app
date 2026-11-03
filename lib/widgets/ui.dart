@@ -38,12 +38,12 @@ class _HeroPatternPainter extends CustomPainter {
     final ring = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
-      ..color = MwalikoColors.gold.withValues(alpha: 0.18);
+      ..color = MwalikoColors.accent.withValues(alpha: 0.18);
     final c = Offset(size.width + 20, -10);
     for (var r = 60.0; r < 260; r += 34) {
       canvas.drawCircle(c, r, ring);
     }
-    final dots = Paint()..color = MwalikoColors.gold.withValues(alpha: 0.22);
+    final dots = Paint()..color = MwalikoColors.accent.withValues(alpha: 0.22);
     final rng = Random(5);
     for (var i = 0; i < 16; i++) {
       canvas.drawCircle(
@@ -110,7 +110,7 @@ class SectionHeader extends StatelessWidget {
 
 /// Ikoni ndani ya duara lenye rangi hafifu.
 class IconBadge extends StatelessWidget {
-  const IconBadge(this.icon, {super.key, this.color = MwalikoColors.plum, this.size = 44});
+  const IconBadge(this.icon, {super.key, this.color = MwalikoColors.primary, this.size = 44});
 
   final IconData icon;
   final Color color;
@@ -229,11 +229,7 @@ class BalanceCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 18, 16, 18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFE9C46A), MwalikoColors.gold, Color(0xFFB8862E)],
-        ),
+        gradient: MwalikoColors.accentGradient,
         boxShadow: MwalikoShadows.lifted,
       ),
       child: Row(
@@ -248,7 +244,7 @@ class BalanceCard extends StatelessWidget {
                     fontSize: 11,
                     letterSpacing: 1.6,
                     fontWeight: FontWeight.w700,
-                    color: MwalikoColors.plumDeep,
+                    color: MwalikoColors.primaryDeep,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -261,7 +257,7 @@ class BalanceCard extends StatelessWidget {
                         fontFamily: 'PlayfairDisplay',
                         fontSize: 34,
                         fontWeight: FontWeight.w700,
-                        color: MwalikoColors.plumDeep,
+                        color: MwalikoColors.primaryDeep,
                         height: 1,
                       ),
                     ),
@@ -270,7 +266,7 @@ class BalanceCard extends StatelessWidget {
                       padding: EdgeInsets.only(bottom: 3),
                       child: Text(
                         'mialiko',
-                        style: TextStyle(fontWeight: FontWeight.w600, color: MwalikoColors.plumDeep),
+                        style: TextStyle(fontWeight: FontWeight.w600, color: MwalikoColors.primaryDeep),
                       ),
                     ),
                   ],
@@ -278,7 +274,7 @@ class BalanceCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   'Thamani ${formatTzs(credits * pricePerGuest)} · ${formatTzs(pricePerGuest)} kwa mwalikwa',
-                  style: TextStyle(fontSize: 11.5, color: MwalikoColors.plumDeep.withValues(alpha: 0.75)),
+                  style: TextStyle(fontSize: 11.5, color: MwalikoColors.primaryDeep.withValues(alpha: 0.75)),
                 ),
               ],
             ),
@@ -288,7 +284,7 @@ class BalanceCard extends StatelessWidget {
               onPressed: onTopUp,
               style: FilledButton.styleFrom(
                 minimumSize: const Size(0, 44),
-                backgroundColor: MwalikoColors.plumDeep,
+                backgroundColor: MwalikoColors.primaryDeep,
                 padding: const EdgeInsets.symmetric(horizontal: 14),
               ),
               icon: const Icon(Icons.add, size: 18),
@@ -319,8 +315,8 @@ class EmptyState extends StatelessWidget {
             Container(
               width: 84,
               height: 84,
-              decoration: BoxDecoration(color: MwalikoColors.goldSoft, borderRadius: BorderRadius.circular(28)),
-              child: Icon(icon, size: 40, color: MwalikoColors.plum),
+              decoration: BoxDecoration(color: MwalikoColors.accentSoft, borderRadius: BorderRadius.circular(28)),
+              child: Icon(icon, size: 40, color: MwalikoColors.primary),
             ),
             const SizedBox(height: 18),
             Text(title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineSmall),
@@ -346,7 +342,7 @@ class InitialsAvatar extends StatelessWidget {
   final double size;
 
   static const _tones = [
-    Color(0xFF7A1F3D),
+    Color(0xFF2A44D4),
     Color(0xFF2F5D3A),
     Color(0xFF0B4F6C),
     Color(0xFF8C6D3A),

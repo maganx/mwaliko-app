@@ -133,7 +133,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
               width: 240,
               height: 240,
               decoration: BoxDecoration(
-                border: Border.all(color: MwalikoColors.gold, width: 3),
+                border: Border.all(color: MwalikoColors.accent, width: 3),
                 borderRadius: BorderRadius.circular(20),
               ),
             ),

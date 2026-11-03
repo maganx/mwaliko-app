@@ -314,7 +314,7 @@ class _GuestRow extends StatelessWidget {
     final g = guest;
     final t = Theme.of(context).textTheme;
     final (label, color) = g.checkedInAt != null
-        ? ('Ameingia', MwalikoColors.plum)
+        ? ('Ameingia', MwalikoColors.primary)
         : switch (g.rsvpStatus) {
             RsvpStatus.attending => (g.rsvpStatus.label, MwalikoColors.success),
             RsvpStatus.declined => (g.rsvpStatus.label, MwalikoColors.danger),

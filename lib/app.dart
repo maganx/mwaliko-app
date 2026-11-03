@@ -132,7 +132,7 @@ class _DemoFrame extends StatelessWidget {
     return Column(
       children: [
         Material(
-          color: MwalikoColors.gold,
+          color: MwalikoColors.accent,
           child: Padding(
             padding: EdgeInsets.fromLTRB(12, top + 3, 12, 3),
             child: const SizedBox(

@@ -118,7 +118,10 @@ class _AdminPaymentsScreenState extends State<AdminPaymentsScreen> {
                             children: [
                               Text(
                                 formatTzs(p.amount),
-                                style: t.titleMedium?.copyWith(color: MwalikoColors.plum, fontWeight: FontWeight.w700),
+                                style: t.titleMedium?.copyWith(
+                                  color: MwalikoColors.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                               Text('mialiko ${formatNumber(p.credits)}', style: t.bodySmall),
                             ],
@@ -130,7 +133,7 @@ class _AdminPaymentsScreenState extends State<AdminPaymentsScreen> {
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          StatusChip(p.methodLabel, color: MwalikoColors.plum, icon: Icons.phone_android),
+                          StatusChip(p.methodLabel, color: MwalikoColors.primary, icon: Icons.phone_android),
                           if (p.phone != null) StatusChip(formatPhone(p.phone), color: MwalikoColors.muted),
                           StatusChip(
                             p.reference ?? 'Hakuna namba ya muamala',

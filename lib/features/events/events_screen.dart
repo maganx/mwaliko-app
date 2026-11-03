@@ -92,7 +92,7 @@ class _EventsScreenState extends State<EventsScreen> {
                         TextField(
                           onChanged: (v) => setState(() => _query = v),
                           style: const TextStyle(color: Colors.white),
-                          cursorColor: MwalikoColors.gold,
+                          cursorColor: MwalikoColors.accent,
                           decoration: InputDecoration(
                             hintText: 'Tafuta tukio au ukumbi',
                             hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
@@ -106,7 +106,7 @@ class _EventsScreenState extends State<EventsScreen> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: MwalikoColors.gold),
+                              borderSide: const BorderSide(color: MwalikoColors.accent),
                             ),
                           ),
                         ),

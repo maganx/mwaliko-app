@@ -88,7 +88,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      backgroundColor: MwalikoColors.plumDeep,
+      backgroundColor: MwalikoColors.primaryDeep,
       body: DecoratedBox(
         decoration: const BoxDecoration(gradient: MwalikoColors.heroGradient),
         child: CustomScrollView(
@@ -98,7 +98,7 @@ class _AuthScreenState extends State<AuthScreen> {
               hasScrollBody: false,
               child: Container(
                 decoration: const BoxDecoration(
-                  color: MwalikoColors.cream,
+                  color: MwalikoColors.background,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                 ),
                 padding: const EdgeInsets.fromLTRB(22, 26, 22, 24),
@@ -290,7 +290,7 @@ class _Hero extends StatelessWidget {
               const SizedBox(height: 12),
               const Text(
                 'Mwaliko',
-                style: TextStyle(fontFamily: 'GreatVibes', fontSize: 54, color: MwalikoColors.gold, height: 1.1),
+                style: TextStyle(fontFamily: 'GreatVibes', fontSize: 54, color: MwalikoColors.accent, height: 1.1),
               ),
               Text(
                 'Kadi za mwaliko za kidijitali kwa SMS, WhatsApp na email',

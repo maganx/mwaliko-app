@@ -115,7 +115,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                     if (d.profile.businessName != null)
                                       Text(
                                         d.profile.businessName!,
-                                        style: const TextStyle(color: MwalikoColors.gold, fontWeight: FontWeight.w600),
+                                        style: const TextStyle(
+                                          color: MwalikoColors.accent,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                   ],
                                 ),
@@ -129,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: Colors.white.withValues(alpha: 0.12),
-                                    border: Border.all(color: MwalikoColors.gold.withValues(alpha: 0.6)),
+                                    border: Border.all(color: MwalikoColors.accent.withValues(alpha: 0.6)),
                                   ),
                                   child: Text(
                                     d.profile.initials,
@@ -330,13 +333,16 @@ class _NextEventCard extends StatelessWidget {
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(color: MwalikoColors.gold, borderRadius: BorderRadius.circular(20)),
+                          decoration: BoxDecoration(
+                            color: MwalikoColors.accent,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                           child: Text(
                             days <= 0 ? 'Leo!' : 'Siku $days zimebaki',
                             style: const TextStyle(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w700,
-                              color: MwalikoColors.plumDeep,
+                              color: MwalikoColors.primaryDeep,
                             ),
                           ),
                         ),

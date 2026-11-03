@@ -180,7 +180,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
                             ],
                           ),
                         ),
-                        const Icon(Icons.edit_calendar, color: MwalikoColors.plum),
+                        const Icon(Icons.edit_calendar, color: MwalikoColors.primary),
                       ],
                     ),
                   ),

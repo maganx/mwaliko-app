@@ -252,7 +252,7 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
                 padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: selected ? MwalikoColors.plum : Colors.transparent, width: 3),
+                  border: Border.all(color: selected ? MwalikoColors.primary : Colors.transparent, width: 3),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
@@ -279,7 +279,7 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.add_photo_alternate_outlined, size: 64, color: MwalikoColors.plum),
+              const Icon(Icons.add_photo_alternate_outlined, size: 64, color: MwalikoColors.primary),
               const SizedBox(height: 12),
               const Text(
                 'Una kadi yako tayari? Pakia picha yake (PNG au JPG).\n'
@@ -400,7 +400,7 @@ class _CustomDesignEditorState extends State<_CustomDesignEditor> {
                 onTap: () => widget.onChanged(c.copyWith(nameColor: col)),
                 child: CircleAvatar(
                   radius: 17,
-                  backgroundColor: c.nameColor == col ? MwalikoColors.plum : Colors.grey.shade300,
+                  backgroundColor: c.nameColor == col ? MwalikoColors.primary : Colors.grey.shade300,
                   child: CircleAvatar(radius: 14, backgroundColor: Color(col)),
                 ),
               ),

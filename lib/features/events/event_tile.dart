@@ -55,7 +55,7 @@ class EventTile extends StatelessWidget {
         ? ('Leo', MwalikoColors.success)
         : days <= 14
         ? ('Siku $days', MwalikoColors.warning)
-        : ('Siku $days', MwalikoColors.plum);
+        : ('Siku $days', MwalikoColors.primary);
 
     return SoftCard(
       onTap: onTap,
@@ -74,7 +74,7 @@ class EventTile extends StatelessWidget {
                     Expanded(
                       child: Text(
                         eventTypeById(event.eventType).label.toUpperCase(),
-                        style: t.labelSmall?.copyWith(color: MwalikoColors.gold, letterSpacing: 1.2),
+                        style: t.labelSmall?.copyWith(color: MwalikoColors.accentInk, letterSpacing: 1.2),
                       ),
                     ),
                     StatusChip(chipLabel, color: chipColor),

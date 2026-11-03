@@ -92,7 +92,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.white.withValues(alpha: 0.12),
-                        border: Border.all(color: MwalikoColors.gold, width: 2),
+                        border: Border.all(color: MwalikoColors.accent, width: 2),
                       ),
                       child: Text(
                         p.initials,
@@ -118,7 +118,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     if (p.businessName != null)
                       Text(
                         p.businessName!,
-                        style: const TextStyle(color: MwalikoColors.gold, fontWeight: FontWeight.w600),
+                        style: const TextStyle(color: MwalikoColors.accent, fontWeight: FontWeight.w600),
                       ),
                     if (p.email != null)
                       Padding(
@@ -130,7 +130,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       ),
                     if (p.isAdmin) ...[
                       const SizedBox(height: 10),
-                      const StatusChip('ADMIN', color: MwalikoColors.gold, icon: Icons.verified_user_outlined),
+                      const StatusChip('ADMIN', color: MwalikoColors.accent, icon: Icons.verified_user_outlined),
                     ],
                   ],
                 ),
@@ -150,7 +150,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             children: [
                               Text(
                                 formatTzs(price.pricePerGuest),
-                                style: t.headlineMedium?.copyWith(color: MwalikoColors.plum),
+                                style: t.headlineMedium?.copyWith(color: MwalikoColors.primary),
                               ),
                               const SizedBox(width: 6),
                               Padding(
