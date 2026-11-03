@@ -91,16 +91,16 @@ class _AccountScreenState extends State<AccountScreen> {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withValues(alpha: 0.12),
-                        border: Border.all(color: MwalikoColors.accent, width: 2),
+                        color: MwalikoColors.glass,
+                        border: Border.all(color: MwalikoColors.primary, width: 2),
                       ),
                       child: Text(
                         p.initials,
                         style: const TextStyle(
-                          fontFamily: 'PlayfairDisplay',
+                          fontFamily: MwalikoFonts.display,
                           fontSize: 30,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: MwalikoColors.ink,
                         ),
                       ),
                     ),
@@ -109,38 +109,35 @@ class _AccountScreenState extends State<AccountScreen> {
                       p.displayName,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontFamily: 'PlayfairDisplay',
+                        fontFamily: MwalikoFonts.display,
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: MwalikoColors.ink,
                       ),
                     ),
                     if (p.businessName != null)
                       Text(
                         p.businessName!,
-                        style: const TextStyle(color: MwalikoColors.accent, fontWeight: FontWeight.w600),
+                        style: const TextStyle(color: MwalikoColors.heroAccent, fontWeight: FontWeight.w600),
                       ),
                     if (p.email != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 2),
-                        child: Text(
-                          p.email!,
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13),
-                        ),
+                        child: Text(p.email!, style: TextStyle(color: MwalikoColors.muted, fontSize: 13)),
                       ),
                     if (p.isAdmin) ...[
                       const SizedBox(height: 10),
-                      const StatusChip('ADMIN', color: MwalikoColors.accent, icon: Icons.verified_user_outlined),
+                      const StatusChip('ADMIN', color: MwalikoColors.heroAccent, icon: Icons.verified_user_outlined),
                     ],
                   ],
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 110),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SectionHeader('Bei za Mwaliko'),
+                    const SectionHeader('Bei'),
                     SoftCard(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -241,7 +238,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     ),
                     const SizedBox(height: 18),
                     Text(
-                      AppConfig.demo ? 'Mwaliko · toleo la demo' : 'Mwaliko',
+                      AppConfig.demo ? "U'r Invente by Tembo Cloud · toleo la demo" : "U'r Invente by Tembo Cloud",
                       textAlign: TextAlign.center,
                       style: t.bodySmall,
                     ),

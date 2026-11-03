@@ -8,6 +8,7 @@ import '../../data/auth_repository.dart';
 import '../../models/card_config.dart';
 import '../../models/event.dart';
 import '../../widgets/async_view.dart';
+import '../../widgets/ui.dart';
 import '../cards/invitation_card.dart';
 
 /// Kuingia na kujisajili kwa wateja wa Mwaliko.
@@ -88,132 +89,135 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
-      backgroundColor: MwalikoColors.primaryDeep,
-      body: DecoratedBox(
-        decoration: const BoxDecoration(gradient: MwalikoColors.heroGradient),
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(child: _Hero(compact: _signUp)),
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: MwalikoColors.background,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                ),
-                padding: const EdgeInsets.fromLTRB(22, 26, 22, 24),
-                child: SafeArea(
-                  top: false,
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 440),
-                      child: Form(
-                        key: _form,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(_signUp ? 'Fungua akaunti' : 'Karibu tena', style: textTheme.headlineMedium),
-                            const SizedBox(height: 4),
-                            Text(
-                              _signUp
-                                  ? 'Anza kutuma kadi nzuri za mwaliko kwa wateja wako.'
-                                  : 'Ingia kusimamia matukio na mialiko yako.',
-                              style: textTheme.bodyMedium?.copyWith(color: MwalikoColors.muted),
-                            ),
-                            const SizedBox(height: 22),
-                            if (_signUp) ...[
-                              TextFormField(
-                                controller: _name,
-                                textCapitalization: TextCapitalization.words,
-                                decoration: const InputDecoration(
-                                  labelText: 'Jina lako kamili',
-                                  prefixIcon: Icon(Icons.person_outline),
-                                ),
-                                validator: (v) => (v == null || v.trim().length < 3) ? 'Weka jina lako' : null,
-                              ),
-                              const SizedBox(height: 12),
-                              TextFormField(
-                                controller: _business,
-                                textCapitalization: TextCapitalization.words,
-                                decoration: const InputDecoration(
-                                  labelText: 'Jina la biashara (si lazima)',
-                                  prefixIcon: Icon(Icons.storefront_outlined),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              TextFormField(
-                                controller: _phone,
-                                keyboardType: TextInputType.phone,
-                                decoration: const InputDecoration(
-                                  labelText: 'Namba ya simu',
-                                  hintText: '0712 345 678',
-                                  prefixIcon: Icon(Icons.phone_outlined),
-                                ),
-                                validator: (v) => normalizePhone(v ?? '') == null ? 'Weka namba sahihi ya simu' : null,
-                              ),
-                              const SizedBox(height: 12),
-                            ],
-                            TextFormField(
-                              controller: _email,
-                              keyboardType: TextInputType.emailAddress,
-                              autofillHints: const [AutofillHints.email],
-                              decoration: const InputDecoration(
-                                labelText: 'Email',
-                                prefixIcon: Icon(Icons.mail_outline),
-                              ),
-                              validator: (v) =>
-                                  (v == null || !v.contains('@') || !v.contains('.')) ? 'Weka email sahihi' : null,
-                            ),
-                            const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _password,
-                              obscureText: _hidePassword,
-                              autofillHints: [_signUp ? AutofillHints.newPassword : AutofillHints.password],
-                              decoration: InputDecoration(
-                                labelText: 'Nenosiri',
-                                prefixIcon: const Icon(Icons.lock_outline),
-                                suffixIcon: IconButton(
-                                  tooltip: _hidePassword ? 'Onyesha' : 'Ficha',
-                                  icon: Icon(_hidePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
-                                  onPressed: () => setState(() => _hidePassword = !_hidePassword),
-                                ),
-                              ),
-                              validator: (v) =>
-                                  (v == null || v.length < 8) ? 'Nenosiri liwe na herufi 8 au zaidi' : null,
-                            ),
-                            if (!_signUp)
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: TextButton(onPressed: _forgot, child: const Text('Umesahau nenosiri?')),
-                              )
-                            else
-                              const SizedBox(height: 16),
-                            FilledButton(
-                              onPressed: _busy ? null : _submit,
-                              child: _busy
-                                  ? const SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
-                                    )
-                                  : Text(_signUp ? 'Fungua akaunti' : 'Ingia'),
-                            ),
-                            const SizedBox(height: 10),
-                            Wrap(
-                              alignment: WrapAlignment.center,
-                              crossAxisAlignment: WrapCrossAlignment.center,
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(child: _Hero(compact: _signUp)),
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Glass(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 22, 20, 16),
+                    child: SafeArea(
+                      top: false,
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 440),
+                          child: Form(
+                            key: _form,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
+                                Text(_signUp ? 'Fungua akaunti' : 'Karibu tena', style: textTheme.headlineMedium),
+                                const SizedBox(height: 4),
                                 Text(
-                                  _signUp ? 'Una akaunti tayari?' : 'Mgeni kwenye Mwaliko?',
+                                  _signUp
+                                      ? 'Anza kutuma kadi nzuri za mwaliko kwa wageni wako.'
+                                      : 'Ingia kusimamia matukio na mialiko yako.',
                                   style: textTheme.bodyMedium?.copyWith(color: MwalikoColors.muted),
                                 ),
-                                TextButton(
-                                  onPressed: _busy ? null : () => setState(() => _signUp = !_signUp),
-                                  child: Text(_signUp ? 'Ingia' : 'Jisajili bure'),
+                                const SizedBox(height: 22),
+                                if (_signUp) ...[
+                                  TextFormField(
+                                    controller: _name,
+                                    textCapitalization: TextCapitalization.words,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Jina lako kamili',
+                                      prefixIcon: Icon(Icons.person_outline),
+                                    ),
+                                    validator: (v) => (v == null || v.trim().length < 3) ? 'Weka jina lako' : null,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextFormField(
+                                    controller: _business,
+                                    textCapitalization: TextCapitalization.words,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Jina la biashara (si lazima)',
+                                      prefixIcon: Icon(Icons.storefront_outlined),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextFormField(
+                                    controller: _phone,
+                                    keyboardType: TextInputType.phone,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Namba ya simu',
+                                      hintText: '0712 345 678',
+                                      prefixIcon: Icon(Icons.phone_outlined),
+                                    ),
+                                    validator: (v) =>
+                                        normalizePhone(v ?? '') == null ? 'Weka namba sahihi ya simu' : null,
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+                                TextFormField(
+                                  controller: _email,
+                                  keyboardType: TextInputType.emailAddress,
+                                  autofillHints: const [AutofillHints.email],
+                                  decoration: const InputDecoration(
+                                    labelText: 'Email',
+                                    prefixIcon: Icon(Icons.mail_outline),
+                                  ),
+                                  validator: (v) =>
+                                      (v == null || !v.contains('@') || !v.contains('.')) ? 'Weka email sahihi' : null,
+                                ),
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: _password,
+                                  obscureText: _hidePassword,
+                                  autofillHints: [_signUp ? AutofillHints.newPassword : AutofillHints.password],
+                                  decoration: InputDecoration(
+                                    labelText: 'Nenosiri',
+                                    prefixIcon: const Icon(Icons.lock_outline),
+                                    suffixIcon: IconButton(
+                                      tooltip: _hidePassword ? 'Onyesha' : 'Ficha',
+                                      icon: Icon(
+                                        _hidePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                      ),
+                                      onPressed: () => setState(() => _hidePassword = !_hidePassword),
+                                    ),
+                                  ),
+                                  validator: (v) =>
+                                      (v == null || v.length < 8) ? 'Nenosiri liwe na herufi 8 au zaidi' : null,
+                                ),
+                                if (!_signUp)
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: TextButton(onPressed: _forgot, child: const Text('Umesahau nenosiri?')),
+                                  )
+                                else
+                                  const SizedBox(height: 16),
+                                FilledButton(
+                                  onPressed: _busy ? null : _submit,
+                                  child: _busy
+                                      ? const SizedBox(
+                                          width: 22,
+                                          height: 22,
+                                          child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
+                                        )
+                                      : Text(_signUp ? 'Fungua akaunti' : 'Ingia'),
+                                ),
+                                const SizedBox(height: 10),
+                                Wrap(
+                                  alignment: WrapAlignment.center,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    Text(
+                                      _signUp ? 'Una akaunti tayari?' : "Mgeni kwenye U'r Invente?",
+                                      style: textTheme.bodyMedium?.copyWith(color: MwalikoColors.muted),
+                                    ),
+                                    TextButton(
+                                      onPressed: _busy ? null : () => setState(() => _signUp = !_signUp),
+                                      child: Text(_signUp ? 'Ingia' : 'Jisajili bure'),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
@@ -221,8 +225,8 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -263,16 +267,18 @@ class _Hero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardHeight = compact ? 150.0 : 206.0;
+    final cardHeight = compact ? 120.0 : 170.0;
     final shift = cardHeight * 0.5;
     return SafeArea(
       bottom: false,
       child: AnimatedSize(
         duration: const Duration(milliseconds: 250),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
           child: Column(
             children: [
+              const BrandLogo(height: 58),
+              const SizedBox(height: 10),
               SizedBox(
                 height: cardHeight + 24,
                 child: Stack(
@@ -287,15 +293,11 @@ class _Hero extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
-              const Text(
-                'Mwaliko',
-                style: TextStyle(fontFamily: 'GreatVibes', fontSize: 54, color: MwalikoColors.accent, height: 1.1),
-              ),
+              const SizedBox(height: 10),
               Text(
-                'Kadi za mwaliko za kidijitali kwa SMS, WhatsApp na email',
+                'Mialiko inayofika, wageni wanaofika.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.82), fontSize: 13.5),
+                style: const TextStyle(color: MwalikoColors.muted, fontSize: 13.5, fontWeight: FontWeight.w500),
               ),
             ],
           ),

@@ -39,11 +39,14 @@ class _EventsScreenState extends State<EventsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'new-event',
-        onPressed: () => _open('/events/new'),
-        icon: const Icon(Icons.add),
-        label: const Text('Tukio jipya'),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 84),
+        child: FloatingActionButton.extended(
+          heroTag: 'new-event',
+          onPressed: () => _open('/events/new'),
+          icon: const Icon(Icons.add),
+          label: const Text('Tukio jipya'),
+        ),
       ),
       body: AsyncView(
         future: _future,
@@ -77,36 +80,36 @@ class _EventsScreenState extends State<EventsScreen> {
                         const Text(
                           'Matukio yako',
                           style: TextStyle(
-                            fontFamily: 'PlayfairDisplay',
+                            fontFamily: MwalikoFonts.display,
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: MwalikoColors.ink,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           '${events.length} jumla · $upcomingCount yanakuja',
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 13),
+                          style: TextStyle(color: MwalikoColors.muted, fontSize: 13),
                         ),
                         const SizedBox(height: 16),
                         TextField(
                           onChanged: (v) => setState(() => _query = v),
-                          style: const TextStyle(color: Colors.white),
-                          cursorColor: MwalikoColors.accent,
+                          style: const TextStyle(color: MwalikoColors.ink),
+                          cursorColor: MwalikoColors.primary,
                           decoration: InputDecoration(
                             hintText: 'Tafuta tukio au ukumbi',
-                            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
-                            prefixIcon: Icon(Icons.search, color: Colors.white.withValues(alpha: 0.7)),
+                            hintStyle: TextStyle(color: MwalikoColors.muted),
+                            prefixIcon: Icon(Icons.search, color: MwalikoColors.muted),
                             filled: true,
-                            fillColor: Colors.white.withValues(alpha: 0.12),
+                            fillColor: MwalikoColors.glass,
                             contentPadding: const EdgeInsets.symmetric(vertical: 12),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
+                              borderSide: BorderSide(color: MwalikoColors.glassBorder),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(color: MwalikoColors.accent),
+                              borderSide: const BorderSide(color: MwalikoColors.primary),
                             ),
                           ),
                         ),
@@ -148,7 +151,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   )
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 170),
                     sliver: SliverList.separated(
                       itemCount: shown.length,
                       separatorBuilder: (_, _) => const SizedBox(height: 12),

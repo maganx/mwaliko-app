@@ -98,25 +98,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      _greeting,
-                                      style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 13),
-                                    ),
+                                    Text(_greeting, style: TextStyle(color: MwalikoColors.muted, fontSize: 13)),
                                     const SizedBox(height: 2),
                                     Text(
                                       d.profile.displayName.split(' ').first,
                                       style: const TextStyle(
-                                        fontFamily: 'PlayfairDisplay',
+                                        fontFamily: MwalikoFonts.display,
                                         fontSize: 28,
                                         fontWeight: FontWeight.w700,
-                                        color: Colors.white,
+                                        color: MwalikoColors.ink,
                                       ),
                                     ),
                                     if (d.profile.businessName != null)
                                       Text(
                                         d.profile.businessName!,
                                         style: const TextStyle(
-                                          color: MwalikoColors.accent,
+                                          color: MwalikoColors.heroAccent,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -131,12 +128,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: Colors.white.withValues(alpha: 0.12),
-                                    border: Border.all(color: MwalikoColors.accent.withValues(alpha: 0.6)),
+                                    color: MwalikoColors.glassStrong,
+                                    border: Border.all(color: MwalikoColors.glassBorder),
                                   ),
                                   child: Text(
                                     d.profile.initials,
-                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                                    style: const TextStyle(color: MwalikoColors.accentInk, fontWeight: FontWeight.w700),
                                   ),
                                 ),
                               ),
@@ -235,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(height: 12),
                         ],
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 110),
                     ],
                   ),
                 ),
@@ -260,9 +257,9 @@ class _HeroStat extends StatelessWidget {
       children: [
         Text(
           value,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: MwalikoColors.ink),
         ),
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.7))),
+        Text(label, style: TextStyle(fontSize: 12, color: MwalikoColors.muted)),
       ],
     ),
   );
@@ -333,16 +330,13 @@ class _NextEventCard extends StatelessWidget {
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: MwalikoColors.accent,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
                           child: Text(
                             days <= 0 ? 'Leo!' : 'Siku $days zimebaki',
                             style: const TextStyle(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w700,
-                              color: MwalikoColors.primaryDeep,
+                              color: MwalikoColors.accentInk,
                             ),
                           ),
                         ),
@@ -352,7 +346,7 @@ class _NextEventCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontFamily: 'PlayfairDisplay',
+                            fontFamily: MwalikoFonts.display,
                             fontSize: 19,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,

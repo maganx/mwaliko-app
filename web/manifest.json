@@ -1,11 +1,11 @@
 {
-    "name": "Mwaliko",
-    "short_name": "Mwaliko",
+    "name": "U'r Invente",
+    "short_name": "U'r Invente",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0D1B5E",
-    "theme_color": "#2A44D4",
-    "description": "Simamia mialiko ya matukio kwa SMS, WhatsApp na email.",
+    "background_color": "#5CD6CF",
+    "theme_color": "#3BB8D0",
+    "description": "U'r Invente by Tembo Cloud: simamia mialiko ya matukio kwa SMS, WhatsApp na email.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

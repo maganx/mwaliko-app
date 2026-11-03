@@ -369,7 +369,7 @@ class _ChannelCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
             child: Column(
               children: [
-                Icon(icon, color: selected ? MwalikoColors.accent : MwalikoColors.primary),
+                Icon(icon, color: selected ? Colors.white : MwalikoColors.primary),
                 const SizedBox(height: 6),
                 Text(
                   channel.label,

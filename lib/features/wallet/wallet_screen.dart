@@ -157,16 +157,16 @@ class _WalletScreenState extends State<WalletScreen> {
                                   padding: const EdgeInsets.only(right: 8),
                                   child: IconButton(
                                     onPressed: () => Navigator.of(context).maybePop(),
-                                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                                    icon: const Icon(Icons.arrow_back, color: MwalikoColors.ink),
                                   ),
                                 ),
                               const Text(
                                 'Salio',
                                 style: TextStyle(
-                                  fontFamily: 'PlayfairDisplay',
+                                  fontFamily: MwalikoFonts.display,
                                   fontSize: 28,
                                   fontWeight: FontWeight.w700,
-                                  color: Colors.white,
+                                  color: MwalikoColors.ink,
                                 ),
                               ),
                             ],
@@ -174,7 +174,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           const SizedBox(height: 2),
                           Text(
                             'Mwalikwa 1 = mwaliko 1 · ${formatTzs(p.pricePerGuest)} kwa mwalikwa',
-                            style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 13),
+                            style: TextStyle(color: MwalikoColors.muted, fontSize: 13),
                           ),
                         ],
                       ),
@@ -315,7 +315,7 @@ class _WalletScreenState extends State<WalletScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 4),
                             child: Column(children: [for (final x in d.transactions) _TransactionRow(x)]),
                           ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 110),
                       ],
                     ),
                   ),
@@ -376,7 +376,7 @@ class _PackageCard extends StatelessWidget {
                     ),
                     child: const Text(
                       'Tukio 1',
-                      style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: MwalikoColors.primaryDeep),
+                      style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: MwalikoColors.onAccent),
                     ),
                   ),
                 ),
@@ -389,7 +389,7 @@ class _PackageCard extends StatelessWidget {
                       Text(
                         formatNumber(credits),
                         style: TextStyle(
-                          fontFamily: 'PlayfairDisplay',
+                          fontFamily: MwalikoFonts.display,
                           fontSize: 26,
                           fontWeight: FontWeight.w700,
                           color: selected ? Colors.white : MwalikoColors.primary,
@@ -451,7 +451,7 @@ class _TotalBar extends StatelessWidget {
                   child: Text(
                     amount == null ? 'TSh —' : formatTzs(amount!),
                     style: const TextStyle(
-                      fontFamily: 'PlayfairDisplay',
+                      fontFamily: MwalikoFonts.display,
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
@@ -465,7 +465,7 @@ class _TotalBar extends StatelessWidget {
             onPressed: busy || quantity == null ? null : onPay,
             style: FilledButton.styleFrom(
               backgroundColor: MwalikoColors.accent,
-              foregroundColor: MwalikoColors.primaryDeep,
+              foregroundColor: MwalikoColors.onAccent,
               disabledBackgroundColor: Colors.white24,
               minimumSize: const Size(0, 48),
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -474,7 +474,7 @@ class _TotalBar extends StatelessWidget {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2.2, color: MwalikoColors.primaryDeep),
+                    child: CircularProgressIndicator(strokeWidth: 2.2, color: MwalikoColors.onAccent),
                   )
                 : const Text('Lipia'),
           ),

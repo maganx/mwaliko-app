@@ -50,7 +50,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
     _busy = true;
     try {
       if (!raw.startsWith('MWALIKO:')) {
-        await _result(icon: Icons.help_outline, color: MwalikoColors.warning, title: 'Si kadi ya Mwaliko');
+        await _result(icon: Icons.help_outline, color: MwalikoColors.warning, title: "Si kadi ya U'r Invente");
         return;
       }
       final guest = await _repo.findByToken(widget.eventId, raw.substring('MWALIKO:'.length));

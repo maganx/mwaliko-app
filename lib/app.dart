@@ -32,14 +32,19 @@ class _MwalikoAppState extends State<MwalikoApp> {
   @override
   Widget build(BuildContext context) {
     if (!AppConfig.isConfigured && !AppConfig.demo) {
-      return MaterialApp(theme: buildTheme(), home: const _SetupRequired());
+      return MaterialApp(
+        theme: buildTheme(),
+        builder: (context, child) => BrandBackground(child: child!),
+        home: const _SetupRequired(),
+      );
     }
     return MaterialApp.router(
-      title: 'Mwaliko',
+      title: "U'r Invente",
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
       routerConfig: _router,
-      builder: AppConfig.demo ? (context, child) => _DemoFrame(child: child!) : null,
+      // Asili ya aqua iko nyuma ya kila skrini (scaffold ni wazi).
+      builder: (context, child) => BrandBackground(child: AppConfig.demo ? _DemoFrame(child: child!) : child!),
       locale: const Locale('sw'),
       supportedLocales: const [Locale('sw'), Locale('en')],
       localizationsDelegates: const [
@@ -132,7 +137,7 @@ class _DemoFrame extends StatelessWidget {
     return Column(
       children: [
         Material(
-          color: MwalikoColors.accent,
+          color: MwalikoColors.pendingBg,
           child: Padding(
             padding: EdgeInsets.fromLTRB(12, top + 3, 12, 3),
             child: const SizedBox(
@@ -162,7 +167,8 @@ class _SetupRequired extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.all(24),
         child: Text(
-          'Mwaliko haijaunganishwa na Supabase.\n\n'
+          "U'r Invente haijaunganishwa na Supabase.\n\n"
+          ''
           'Endesha app hivi:\nflutter run --dart-define-from-file=env.json\n\n'
           '(angalia env.example.json na README)',
           textAlign: TextAlign.center,

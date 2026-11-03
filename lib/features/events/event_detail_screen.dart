@@ -97,7 +97,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 Text(
                                   eventTypeById(event.eventType).label.toUpperCase(),
                                   style: const TextStyle(
-                                    color: MwalikoColors.accent,
+                                    color: MwalikoColors.heroAccent,
                                     fontSize: 11.5,
                                     letterSpacing: 1.6,
                                     fontWeight: FontWeight.w700,
@@ -107,11 +107,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 Text(
                                   event.title,
                                   style: const TextStyle(
-                                    fontFamily: 'PlayfairDisplay',
+                                    fontFamily: MwalikoFonts.display,
                                     fontSize: 25,
                                     height: 1.2,
                                     fontWeight: FontWeight.w700,
-                                    color: Colors.white,
+                                    color: MwalikoColors.ink,
                                   ),
                                 ),
                                 const SizedBox(height: 12),
@@ -122,7 +122,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: past ? Colors.white24 : MwalikoColors.accent,
+                                    color: past ? MwalikoColors.glass : MwalikoColors.pendingBg,
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
@@ -130,7 +130,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                     style: TextStyle(
                                       fontSize: 11.5,
                                       fontWeight: FontWeight.w700,
-                                      color: past ? Colors.white : MwalikoColors.primaryDeep,
+                                      color: past ? MwalikoColors.muted : MwalikoColors.accentInk,
                                     ),
                                   ),
                                 ),
@@ -257,11 +257,11 @@ class _HeroIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-    color: Colors.white.withValues(alpha: 0.12),
+    color: MwalikoColors.glassStrong,
     shape: const CircleBorder(),
     child: IconButton(
       tooltip: tooltip,
-      icon: Icon(icon, color: Colors.white, size: 20),
+      icon: Icon(icon, color: MwalikoColors.ink, size: 20),
       onPressed: onTap,
     ),
   );
@@ -278,10 +278,10 @@ class _HeroLine extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 15, color: MwalikoColors.accent),
+        Icon(icon, size: 15, color: MwalikoColors.heroAccent),
         const SizedBox(width: 8),
         Expanded(
-          child: Text(text, style: TextStyle(color: Colors.white.withValues(alpha: 0.88), fontSize: 13)),
+          child: Text(text, style: TextStyle(color: MwalikoColors.ink, fontSize: 13)),
         ),
       ],
     ),
@@ -300,7 +300,7 @@ class _Stat extends StatelessWidget {
       children: [
         Text(
           '$value',
-          style: TextStyle(fontFamily: 'PlayfairDisplay', fontSize: 26, fontWeight: FontWeight.w700, color: color),
+          style: TextStyle(fontFamily: MwalikoFonts.display, fontSize: 26, fontWeight: FontWeight.w700, color: color),
         ),
         Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
@@ -336,15 +336,17 @@ class _ActionCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              IconBadge(icon, color: highlight ? MwalikoColors.accent : MwalikoColors.primary, size: 40),
+              IconBadge(icon, color: highlight ? Colors.white : MwalikoColors.primary, size: 40),
               const Spacer(),
               Text(
                 '0$step',
                 style: TextStyle(
-                  fontFamily: 'PlayfairDisplay',
+                  fontFamily: MwalikoFonts.display,
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: (highlight ? Colors.white : MwalikoColors.primary).withValues(alpha: 0.25),
+                  color: highlight
+                      ? Colors.white.withValues(alpha: 0.6)
+                      : MwalikoColors.accentInk.withValues(alpha: 0.45),
                 ),
               ),
             ],

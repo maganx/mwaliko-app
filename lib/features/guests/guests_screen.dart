@@ -291,7 +291,7 @@ class _Mini extends StatelessWidget {
       children: [
         Text(
           '$value',
-          style: TextStyle(fontFamily: 'PlayfairDisplay', fontSize: 22, fontWeight: FontWeight.w700, color: color),
+          style: TextStyle(fontFamily: MwalikoFonts.display, fontSize: 22, fontWeight: FontWeight.w700, color: color),
         ),
         FittedBox(
           fit: BoxFit.scaleDown,

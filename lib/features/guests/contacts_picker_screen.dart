@@ -47,7 +47,7 @@ class _ContactsPickerScreenState extends State<ContactsPickerScreen> {
     }
     final status = await FlutterContacts.permissions.request(PermissionType.read);
     if (status != PermissionStatus.granted && status != PermissionStatus.limited) {
-      setState(() => _error = 'Ruhusu Mwaliko kusoma contacts kwenye Settings za simu.');
+      setState(() => _error = "Ruhusu U'r Invente kusoma contacts kwenye Settings za simu.");
       return;
     }
     final contacts = await FlutterContacts.getAll(properties: {ContactProperty.phone, ContactProperty.email});

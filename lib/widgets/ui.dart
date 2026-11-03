@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -6,7 +7,7 @@ import '../core/money.dart';
 import '../core/theme.dart';
 import '../models/event.dart';
 
-/// Kichwa chenye gradient ya zambarau na mapambo ya dhahabu.
+/// Kichwa cha skrini: maandishi yanakaa moja kwa moja juu ya asili ya aqua.
 class HeroHeader extends StatelessWidget {
   const HeroHeader({super.key, required this.child, this.bottomPadding = 28, this.radius = 32});
 
@@ -16,15 +17,46 @@ class HeroHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.vertical(bottom: Radius.circular(radius)),
-      child: DecoratedBox(
-        decoration: const BoxDecoration(gradient: MwalikoColors.heroGradient),
-        child: CustomPaint(
-          painter: _HeroPatternPainter(),
-          child: SafeArea(
-            bottom: false,
-            child: Padding(padding: EdgeInsets.fromLTRB(20, 12, 20, bottomPadding), child: child),
+    return SafeArea(
+      bottom: false,
+      child: Padding(padding: EdgeInsets.fromLTRB(20, 12, 20, bottomPadding), child: child),
+    );
+  }
+}
+
+/// Kipande cha glass: nyeupe nusu-uwazi, blur nyuma yake na mpaka mweupe.
+class Glass extends StatelessWidget {
+  const Glass({
+    super.key,
+    required this.child,
+    this.radius = 22,
+    this.color = MwalikoColors.glass,
+    this.blur = 18,
+    this.shadow = true,
+  });
+
+  final Widget child;
+  final double radius;
+  final Color color;
+  final double blur;
+  final bool shadow;
+
+  @override
+  Widget build(BuildContext context) {
+    final r = BorderRadius.circular(radius);
+    return DecoratedBox(
+      decoration: BoxDecoration(borderRadius: r, boxShadow: shadow ? MwalikoShadows.soft : null),
+      child: ClipRRect(
+        borderRadius: r,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: r,
+              border: Border.all(color: MwalikoColors.glassBorder, width: 1.5),
+            ),
+            child: child,
           ),
         ),
       ),
@@ -32,58 +64,38 @@ class HeroHeader extends StatelessWidget {
   }
 }
 
-class _HeroPatternPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final ring = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..color = MwalikoColors.accent.withValues(alpha: 0.18);
-    final c = Offset(size.width + 20, -10);
-    for (var r = 60.0; r < 260; r += 34) {
-      canvas.drawCircle(c, r, ring);
-    }
-    final dots = Paint()..color = MwalikoColors.accent.withValues(alpha: 0.22);
-    final rng = Random(5);
-    for (var i = 0; i < 16; i++) {
-      canvas.drawCircle(
-        Offset(rng.nextDouble() * size.width * 0.6, rng.nextDouble() * size.height),
-        rng.nextDouble() * 1.6 + 0.6,
-        dots,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_HeroPatternPainter oldDelegate) => false;
-}
-
-/// Kadi nyeupe yenye kivuli laini.
+/// Kadi ya glass (inaweza kubonyezwa).
 class SoftCard extends StatelessWidget {
   const SoftCard({super.key, required this.child, this.padding = const EdgeInsets.all(16), this.onTap, this.color});
 
   final Widget child;
   final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
+
+  /// Rangi kamili badala ya glass (mf. kadi ya orange ya kitendo kikuu).
   final Color? color;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color ?? MwalikoColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: MwalikoShadows.soft,
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: onTap,
-          child: Padding(padding: padding, child: child),
-        ),
+    final content = Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: onTap,
+        child: Padding(padding: padding, child: child),
       ),
     );
+    if (color != null && color!.a == 1) {
+      return Container(
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: color == MwalikoColors.primary ? MwalikoShadows.button : MwalikoShadows.soft,
+        ),
+        child: content,
+      );
+    }
+    return Glass(color: color ?? MwalikoColors.glass, child: content);
   }
 }
 
@@ -120,7 +132,10 @@ class IconBadge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     width: size,
     height: size,
-    decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(size * 0.34)),
+    decoration: BoxDecoration(
+      color: color == Colors.white ? Colors.white.withValues(alpha: 0.22) : Colors.white.withValues(alpha: 0.7),
+      borderRadius: BorderRadius.circular(size * 0.34),
+    ),
     child: Icon(icon, color: color, size: size * 0.5),
   );
 }
@@ -225,72 +240,69 @@ class BalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 18, 16, 18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: MwalikoColors.accentGradient,
-        boxShadow: MwalikoShadows.lifted,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'SALIO LAKO',
-                  style: TextStyle(
-                    fontSize: 11,
-                    letterSpacing: 1.6,
-                    fontWeight: FontWeight.w700,
-                    color: MwalikoColors.primaryDeep,
+    return Glass(
+      color: MwalikoColors.glassStrong,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 18, 16, 18),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'SALIO LAKO',
+                    style: TextStyle(
+                      fontSize: 11,
+                      letterSpacing: 1.6,
+                      fontWeight: FontWeight.w700,
+                      color: MwalikoColors.accentInk,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      formatNumber(credits),
-                      style: const TextStyle(
-                        fontFamily: 'PlayfairDisplay',
-                        fontSize: 34,
-                        fontWeight: FontWeight.w700,
-                        color: MwalikoColors.primaryDeep,
-                        height: 1,
+                  const SizedBox(height: 4),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        formatNumber(credits),
+                        style: const TextStyle(
+                          fontFamily: MwalikoFonts.display,
+                          fontSize: 34,
+                          fontWeight: FontWeight.w800,
+                          color: MwalikoColors.ink,
+                          height: 1,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 3),
-                      child: Text(
-                        'mialiko',
-                        style: TextStyle(fontWeight: FontWeight.w600, color: MwalikoColors.primaryDeep),
+                      const SizedBox(width: 6),
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 3),
+                        child: Text(
+                          'mialiko',
+                          style: TextStyle(fontWeight: FontWeight.w600, color: MwalikoColors.ink),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Thamani ${formatTzs(credits * pricePerGuest)} · ${formatTzs(pricePerGuest)} kwa mwalikwa',
-                  style: TextStyle(fontSize: 11.5, color: MwalikoColors.primaryDeep.withValues(alpha: 0.75)),
-                ),
-              ],
-            ),
-          ),
-          if (onTopUp != null)
-            FilledButton.icon(
-              onPressed: onTopUp,
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(0, 44),
-                backgroundColor: MwalikoColors.primaryDeep,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Thamani ${formatTzs(credits * pricePerGuest)} · ${formatTzs(pricePerGuest)} kwa mwalikwa',
+                    style: TextStyle(fontSize: 11.5, color: MwalikoColors.muted),
+                  ),
+                ],
               ),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Ongeza'),
             ),
-        ],
+            if (onTopUp != null)
+              FilledButton.icon(
+                onPressed: onTopUp,
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(0, 44),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                ),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Ongeza'),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -341,15 +353,6 @@ class InitialsAvatar extends StatelessWidget {
   final String name;
   final double size;
 
-  static const _tones = [
-    Color(0xFF2A44D4),
-    Color(0xFF2F5D3A),
-    Color(0xFF0B4F6C),
-    Color(0xFF8C6D3A),
-    Color(0xFF5B3E8A),
-    Color(0xFFB23A16),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
@@ -359,16 +362,34 @@ class InitialsAvatar extends StatelessWidget {
                   ? parts.first.characters.first
                   : parts.first.characters.first + parts.last.characters.first)
               .toUpperCase();
-    final tone = _tones[name.hashCode.abs() % _tones.length];
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: BoxDecoration(color: tone.withValues(alpha: 0.12), shape: BoxShape.circle),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.85),
+        shape: BoxShape.circle,
+        border: Border.all(color: MwalikoColors.glassBorder),
+      ),
       child: Text(
         initials,
-        style: TextStyle(fontWeight: FontWeight.w700, color: tone, fontSize: size * 0.36),
+        style: TextStyle(fontWeight: FontWeight.w700, color: MwalikoColors.accentInk, fontSize: size * 0.34),
       ),
     );
   }
+}
+
+/// Nembo kamili ya U'r Invente (assets/brand/logo.png): alama U, jina na "BY TEMBO CLOUD".
+class BrandLogo extends StatelessWidget {
+  const BrandLogo({super.key, this.height = 64});
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) => Image.asset(
+    'assets/brand/logo.png',
+    height: height,
+    filterQuality: FilterQuality.medium,
+    semanticLabel: "U'r Invente by Tembo Cloud",
+  );
 }

@@ -5,7 +5,7 @@ class Pricing {
     this.pricePerGuest = 3000,
     this.minPurchase = 10,
     this.packages = const [10, 50, 100, 200, 500],
-    this.paymentInstructions = 'Lipa kwa M-Pesa Lipa Namba 000000 (Mwaliko), kisha weka namba ya muamala.',
+    this.paymentInstructions = "Lipa kwa M-Pesa Lipa Namba 000000 (U'r Invente), kisha weka namba ya muamala.",
   });
 
   final String currency;
