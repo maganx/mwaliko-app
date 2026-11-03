@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 class BrandColors {
   BrandColors._();
 
-  // Orange: actions, primary buttons, selected tab.
-  static const orange = Color(0xFFFF6A00);
-  static const orangeLight = Color(0xFFFF9A1F);
-  static const orangeDeep = Color(0xFFFF4F00);
+  // Orange: solid #FF7200 for actions, primary buttons, selected tab.
+  static const orange = Color(0xFFFF7200);
+  static const orangeLight = Color(0xFFFF8F33);
+  static const orangeDeep = Color(0xFFE06400);
   static const orangeText = Color(0xFFC2410C);
 
   // Aqua: screen background gradient and decorative circles.
@@ -40,7 +40,10 @@ class BrandColors {
     stops: [0, 0.55, 1],
   );
 
-  static const buttonGradient = LinearGradient(
-    colors: [orangeLight, orangeDeep],
+  /// Primary buttons are solid [orange]; this subtle glow sits behind them.
+  static const buttonShadow = BoxShadow(
+    color: Color(0x59FF7200),
+    blurRadius: 22,
+    offset: Offset(0, 10),
   );
 }

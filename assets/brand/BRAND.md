@@ -15,8 +15,8 @@ Mtindo: **Aqua glass + orange**. Asili ya aqua yenye gradient, kadi za glass (ny
 
 ## Nembo
 
-- **Alama** (`mark.svg`): herufi **U** nene ya gradient ya orange, na nyota ya sherehe ya `aqua-deep`. U ni "you", mgeni; nyota ni sherehe.
-- **Logo kamili** (`logo.svg`): alama + "U'r" kwa `ink` + "Invente" kwa gradient ya orange. Kwa asili nyeupe, aqua au glass.
+- **Alama** (`mark.svg`): herufi **U** nene ya orange (#FF7200), na nyota ya sherehe ya `aqua-deep`. U ni "you", mgeni; nyota ni sherehe.
+- **Logo kamili** (`logo.svg`): alama + "U'r" kwa `ink` + "Invente" kwa `orange`. Kwa asili nyeupe, aqua au glass.
 - **Logo ya giza** (`logo-dark.svg`): kwa asili ya `ink` au dark mode.
 - **App icon** (`app-icon.svg`, `app-icon.png` 1024px): asili ya aqua, kioo cha glass katikati, U ya orange. Usiongeze maandishi.
 - Acha nafasi kuzunguka nembo angalau sawa na upana wa nyota. Usizungushe, usinyooshe, usibadilishe rangi.
@@ -25,7 +25,7 @@ Mtindo: **Aqua glass + orange**. Asili ya aqua yenye gradient, kadi za glass (ny
 
 - **Asili ya skrini**: gradient ya `aqua-light` → `aqua` → `lagoon` (135°), na duara 2-3 za `aqua-deep` nyuma ya kadi.
 - **Kadi, inputs, tab bar**: `glass` + blur 16-22px + mpaka `glass-border` + `shadow-glass`. Orodha ndefu tumia `glass-strong` ili isomeke.
-- **Kitufe kikuu**: gradient `orange-light` → `orange-deep`, maandishi `on-orange`, kivuli `shadow-orange`. Kitufe kimoja tu cha orange kwa skrini.
+- **Kitufe kikuu**: `orange` (#FF7200) solid, bila gradient; pressed = `orange-deep`, maandishi `on-orange`, kivuli `shadow-orange`. Kitufe kimoja tu cha orange kwa skrini.
 - **Maandishi**: `ink` kwa makuu, `muted` kwa ya pili, `orange-text` kwa viungo vidogo.
 - **Hali za mgeni**: Amekubali = `success` juu ya `success-bg`; Inasubiri = `orange-text` juu ya `pending-bg`; Imeshindwa = `danger`.
 - Wine, plum na dhahabu za muundo wa zamani hazitumiki tena.
