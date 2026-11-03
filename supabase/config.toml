@@ -1,0 +1,8 @@
+# Sehemu tu ya config ya Supabase CLI inayohusu functions.
+# Endesha `supabase init` kama unataka config kamili ya local dev.
+
+[functions.send-invitations]
+verify_jwt = true
+
+[functions.whatsapp-webhook]
+verify_jwt = false

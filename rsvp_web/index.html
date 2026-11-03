@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="sw">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mwaliko · Thibitisha kuhudhuria</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --maroon:#7a1f3d; --gold:#d4af37; --cream:#fff8f0; --ink:#2a1a20; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:Poppins, system-ui, sans-serif; background:var(--cream); color:var(--ink); }
+    main { max-width:520px; margin:0 auto; padding:20px 16px 48px; }
+    .brand { font-family:"Great Vibes", cursive; color:var(--maroon); font-size:40px; text-align:center; margin:4px 0 12px; }
+    .card-img { width:100%; border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,.15); display:block; }
+    h1 { font-family:"Playfair Display", serif; font-size:26px; margin:20px 0 4px; text-align:center; }
+    .muted { color:#6b5a60; text-align:center; margin:2px 0; }
+    .panel { background:#fff; border-radius:18px; padding:18px; margin-top:18px; border:1px solid #f0e4e4; }
+    .choices { display:grid; grid-template-columns:1fr; gap:10px; margin-top:12px; }
+    button { font:inherit; border-radius:26px; padding:14px; border:2px solid var(--maroon); background:#fff; color:var(--maroon); font-weight:600; cursor:pointer; }
+    button.active, button.primary { background:var(--maroon); color:#fff; }
+    button:disabled { opacity:.6; cursor:default; }
+    label { display:block; margin-top:14px; font-size:14px; }
+    select, textarea { width:100%; font:inherit; padding:10px; border-radius:12px; border:1px solid #e3d4d4; margin-top:6px; }
+    .ok { background:#eaf6ec; color:#1e6b33; border-radius:12px; padding:12px; text-align:center; margin-top:14px; }
+    .err { background:#fdecec; color:#9b1c1c; border-radius:12px; padding:12px; text-align:center; margin-top:14px; }
+    a { color:var(--maroon); }
+    [hidden] { display:none !important; }
+  </style>
+</head>
+<body>
+<main>
+  <div class="brand">Mwaliko</div>
+  <div id="loading" class="muted">Inapakia mwaliko wako…</div>
+  <div id="error" class="err" hidden></div>
+
+  <section id="content" hidden>
+    <img id="card" class="card-img" alt="Kadi ya mwaliko" hidden>
+    <h1 id="title"></h1>
+    <p class="muted" id="hosts"></p>
+    <p class="muted" id="when"></p>
+    <p class="muted" id="venue"></p>
+    <p class="muted" id="map" hidden><a target="_blank" rel="noopener">Fungua ramani</a></p>
+
+    <div class="panel">
+      <strong id="greet"></strong>
+      <div>Tafadhali thibitisha kama utahudhuria.</div>
+      <div class="choices">
+        <button data-status="attending">Nitahudhuria</button>
+        <button data-status="maybe">Labda</button>
+        <button data-status="declined">Sitaweza kuhudhuria</button>
+      </div>
+      <label id="seats-wrap">Idadi ya watu watakaokuja
+        <select id="seats"></select>
+      </label>
+      <label>Ujumbe kwa wenyeji (si lazima)
+        <textarea id="note" rows="2" maxlength="500"></textarea>
+      </label>
+      <button id="submit" class="primary" style="width:100%;margin-top:14px">Tuma jibu</button>
+      <div id="saved" class="ok" hidden></div>
+    </div>
+  </section>
+</main>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  const cfg = window.MWALIKO_CONFIG || {};
+  const token = new URLSearchParams(location.search).get("t");
+  const $ = (id) => document.getElementById(id);
+  let status = null;
+
+  function fail(msg) {
+    $("loading").hidden = true;
+    $("error").textContent = msg;
+    $("error").hidden = false;
+  }
+
+  async function rpc(fn, body) {
+    const res = await fetch(cfg.supabaseUrl + "/rest/v1/rpc/" + fn, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: cfg.supabaseKey },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error((data && data.message) || "Hitilafu ya mtandao");
+    return data;
+  }
+
+  function fmtDate(iso) {
+    const d = new Date(iso);
+    const date = d.toLocaleDateString("sw-TZ", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Africa/Dar_es_Salaam" });
+    // saa kwa mtindo wa Kiswahili
+    const h = Number(d.toLocaleString("en-GB", { hour: "2-digit", hour12: false, timeZone: "Africa/Dar_es_Salaam" }));
+    const m = d.toLocaleString("en-GB", { minute: "2-digit", timeZone: "Africa/Dar_es_Salaam" }).padStart(2, "0");
+    let sw = (h + 6) % 12; if (sw === 0) sw = 12;
+    const period = h >= 5 && h < 12 ? "asubuhi" : h >= 12 && h < 16 ? "mchana" : h >= 16 && h < 19 ? "jioni" : "usiku";
+    return date + " · Saa " + sw + ":" + m + " " + period;
+  }
+
+  function select(s) {
+    status = s;
+    document.querySelectorAll("[data-status]").forEach((b) => b.classList.toggle("active", b.dataset.status === s));
+    $("seats-wrap").hidden = s === "declined";
+  }
+
+  async function load() {
+    if (!token) return fail("Link hii haina token ya mwaliko.");
+    if (!cfg.supabaseUrl) return fail("config.js haijawekwa.");
+    try {
+      const g = await rpc("rsvp_lookup", { p_token: token });
+      if (!g) return fail("Mwaliko haukupatikana. Hakikisha umefungua link kamili.");
+      $("title").textContent = g.event_title;
+      $("hosts").textContent = g.host_names ? g.host_names + " wanakukaribisha" : "";
+      $("when").textContent = fmtDate(g.event_date);
+      $("venue").textContent = g.venue || "";
+      if (g.venue_map_url) { $("map").hidden = false; $("map").querySelector("a").href = g.venue_map_url; }
+      if (g.card_path) {
+        $("card").src = cfg.supabaseUrl + "/storage/v1/object/public/cards/" + g.card_path.split("/").map(encodeURIComponent).join("/");
+        $("card").hidden = false;
+      }
+      $("greet").textContent = "Habari " + g.guest_name + ",";
+      const seats = $("seats");
+      for (let i = 1; i <= g.seats; i++) {
+        const o = document.createElement("option");
+        o.value = i; o.textContent = i;
+        seats.appendChild(o);
+      }
+      seats.value = g.rsvp_seats || g.seats;
+      if (g.rsvp_status && g.rsvp_status !== "pending") select(g.rsvp_status);
+      $("loading").hidden = true;
+      $("content").hidden = false;
+    } catch (e) {
+      fail(e.message);
+    }
+  }
+
+  document.querySelectorAll("[data-status]").forEach((b) => b.addEventListener("click", () => select(b.dataset.status)));
+
+  $("submit").addEventListener("click", async () => {
+    if (!status) { $("saved").hidden = false; $("saved").className = "err"; $("saved").textContent = "Chagua jibu kwanza."; return; }
+    $("submit").disabled = true;
+    try {
+      await rpc("rsvp_respond", { p_token: token, p_status: status, p_seats: Number($("seats").value), p_note: $("note").value || null });
+      $("saved").className = "ok";
+      $("saved").textContent = status === "declined" ? "Asante kwa kutujulisha." : "Asante! Jibu lako limepokelewa. Tunakusubiri.";
+    } catch (e) {
+      $("saved").className = "err";
+      $("saved").textContent = e.message;
+    } finally {
+      $("saved").hidden = false;
+      $("submit").disabled = false;
+    }
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
