@@ -8,6 +8,27 @@ import '../core/money.dart';
 import '../core/theme.dart';
 import '../models/event.dart';
 
+/// Kuanzia upana huu (web kwenye kompyuta) app inaonyesha menyu ya pembeni badala ya ya chini.
+const kWideLayout = 900.0;
+
+bool isWideLayout(BuildContext context) => MediaQuery.sizeOf(context).width >= kWideLayout;
+
+/// Kwenye skrini pana maudhui yanakaa katikati badala ya kunyooshwa upana wote.
+class MaxWidth extends StatelessWidget {
+  const MaxWidth({super.key, required this.child, this.maxWidth = 820});
+
+  final Widget child;
+  final double maxWidth;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: child,
+    ),
+  );
+}
+
 /// Kichwa cha skrini: maandishi yanakaa moja kwa moja juu ya asili ya aqua.
 class HeroHeader extends StatelessWidget {
   const HeroHeader({super.key, required this.child, this.bottomPadding = 28, this.radius = 32});

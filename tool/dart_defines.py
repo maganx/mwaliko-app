@@ -4,18 +4,27 @@
     python3 tool/dart_defines.py build/defines.json
     flutter build apk --dart-define-from-file=build/defines.json
 
-Vigezo: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY (bila hivi app inajengwa kama demo), WEB_BASE_URL,
-SUPPORT_EMAIL, SUPPORT_PHONE, IN_APP_PURCHASES. Thamani zenye nafasi (mf. namba ya simu) zinabaki sahihi.
+Vigezo: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WEB_BASE_URL, SUPPORT_EMAIL, SUPPORT_PHONE, IN_APP_PURCHASES.
+Thamani ambazo hazijawekwa zinachukuliwa kutoka config/production.json (project ya Supabase ya U'r Invente;
+publishable key ni ya umma, data inalindwa na RLS). DEMO=true inajenga demo yenye data ya mfano.
+Thamani zenye nafasi (mf. namba ya simu) zinabaki sahihi.
 """
 import json
 import os
 import sys
 
-env = {k: os.environ.get(k, "").strip() for k in (
-    "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "WEB_BASE_URL", "SUPPORT_EMAIL", "SUPPORT_PHONE", "IN_APP_PURCHASES")}
+KEYS = ("SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "WEB_BASE_URL", "SUPPORT_EMAIL", "SUPPORT_PHONE", "IN_APP_PURCHASES")
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+try:
+    with open(os.path.join(root, "config", "production.json"), encoding="utf-8") as f:
+        production = json.load(f)
+except FileNotFoundError:
+    production = {}
+env = {k: (os.environ.get(k, "").strip() or str(production.get(k, "")).strip()) for k in KEYS}
+demo = os.environ.get("DEMO", "").strip().lower() == "true"
 
 defines = {}
-if env["SUPABASE_URL"] and env["SUPABASE_PUBLISHABLE_KEY"]:
+if not demo and env["SUPABASE_URL"] and env["SUPABASE_PUBLISHABLE_KEY"]:
     defines["SUPABASE_URL"] = env["SUPABASE_URL"]
     defines["SUPABASE_PUBLISHABLE_KEY"] = env["SUPABASE_PUBLISHABLE_KEY"]
 else:

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -199,26 +201,30 @@ class _WalletScreenState extends State<WalletScreen> {
                       children: [
                         if (AppConfig.canBuyCredits) ...[
                           const SectionHeader('Nunua mialiko'),
-                          GridView.count(
-                            crossAxisCount: 3,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            mainAxisSpacing: 10,
-                            crossAxisSpacing: 10,
-                            childAspectRatio: 0.92,
-                            children: [
-                              for (final n in p.packages)
-                                _PackageCard(
-                                  credits: n,
-                                  price: p.priceFor(n),
-                                  selected: _custom.text.isEmpty && _selected == n,
-                                  popular: n == 200,
-                                  onTap: () => setState(() {
-                                    _custom.clear();
-                                    _selected = n;
-                                  }),
-                                ),
-                            ],
+                          LayoutBuilder(
+                            builder: (context, box) => GridView.count(
+                              // Simu: 3 kwa mstari. Skrini pana: vifurushi vyote mstari mmoja.
+                              crossAxisCount: min(p.packages.length, max(3, box.maxWidth ~/ 170)),
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              physics: const NeverScrollableScrollPhysics(),
+                              mainAxisSpacing: 10,
+                              crossAxisSpacing: 10,
+                              childAspectRatio: 0.92,
+                              children: [
+                                for (final n in p.packages)
+                                  _PackageCard(
+                                    credits: n,
+                                    price: p.priceFor(n),
+                                    selected: _custom.text.isEmpty && _selected == n,
+                                    popular: n == 200,
+                                    onTap: () => setState(() {
+                                      _custom.clear();
+                                      _selected = n;
+                                    }),
+                                  ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 12),
                           TextField(

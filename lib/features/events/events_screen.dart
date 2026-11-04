@@ -40,7 +40,7 @@ class _EventsScreenState extends State<EventsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 84),
+        padding: EdgeInsets.only(bottom: isWideLayout(context) ? 0 : 84),
         child: FloatingActionButton.extended(
           heroTag: 'new-event',
           onPressed: () => _open('/events/new'),

@@ -168,8 +168,12 @@ kwanza. GitHub Actions inajenga kila kitu:
 | `ios.yml` | kujenga iOS; secrets zikiwepo: archive na kupakia TestFlight | Secrets `APPLE_TEAM_ID`, `APPSTORE_API_KEY_ID`, `APPSTORE_API_ISSUER_ID`, `APPSTORE_API_PRIVATE_KEY` (+ si lazima `IOS_DIST_CERT_P12_BASE64`, `IOS_DIST_CERT_PASSWORD`) |
 | `web.yml` | web app + sera ya faragha + masharti + kufuta akaunti + RSVP kwenye GitHub Pages | Settings > Pages > Source: GitHub Actions |
 
-Repo variables (Settings > Secrets and variables > Actions > Variables), zinatumika na workflows zote:
-`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (bila hivi app inajengwa kama demo), `WEB_BASE_URL`,
+Project ya Supabase ya U'r Invente (`urinvente`, ref `svfbxnylqeosvtendodv`) iko kwenye
+[`config/production.json`](config/production.json): URL na publishable key ni za umma (data inalindwa na RLS),
+kwa hiyo workflows zote zinajenga app ya kweli bila kuweka chochote. `DEMO=true` inajenga demo.
+
+Repo variables (Settings > Secrets and variables > Actions > Variables), si lazima, zinabadilisha
+`config/production.json`: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `WEB_BASE_URL`,
 `WEB_BASE_HREF` (`/` ukitumia domain yako), `SUPPORT_EMAIL`, `SUPPORT_PHONE`.
 
 Upload key ya Android (mara moja; ihifadhi mahali salama):

@@ -2,7 +2,8 @@
 # Inajenga web app ya U'r Invente pamoja na kurasa za kisheria na ukurasa wa RSVP (build/web).
 #
 # Vigezo (environment variables), vyote si lazima:
-#   SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY  bila hivi, web app inajengwa kama demo (DEMO=true)
+#   SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY  bila hivi zinachukuliwa kutoka config/production.json
+#   DEMO=true        demo yenye data ya mfano, bila Supabase
 #   BASE_HREF        mf. /mwaliko-app/ kwa GitHub Pages, au / kwa domain yako (default /)
 #   WEB_BASE_URL     anwani kamili ya web app, mf. https://app.urinvente.co.tz
 #   SUPPORT_EMAIL, SUPPORT_PHONE  mawasiliano ya msaada kwenye app na kwenye kurasa za kisheria
@@ -36,12 +37,12 @@ done
 # Ukurasa wa RSVP kwa waalikwa: <web app>/rsvp/?t=TOKEN
 mkdir -p build/web/rsvp
 cp rsvp_web/index.html build/web/rsvp/index.html
-cat > build/web/rsvp/config.js <<JS
-window.MWALIKO_CONFIG = {
-  supabaseUrl: "${SUPABASE_URL:-}",
-  supabaseKey: "${SUPABASE_PUBLISHABLE_KEY:-}",
-};
-JS
+python3 - build/defines.json build/web/rsvp/config.js <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+cfg = {"supabaseUrl": d.get("SUPABASE_URL", ""), "supabaseKey": d.get("SUPABASE_PUBLISHABLE_KEY", "")}
+open(sys.argv[2], "w", encoding="utf-8").write("window.MWALIKO_CONFIG = " + json.dumps(cfg, indent=2) + ";\n")
+PY
 
 # GitHub Pages: bila faili hili, folda zinazoanza na "_" hazitumwi
 touch build/web/.nojekyll

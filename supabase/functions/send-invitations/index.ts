@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
             <h2 style="margin:8px 0">${escapeHtml(event.title)}</h2>
             <p>${escapeHtml(eventDate)}${event.venue ? `<br>${escapeHtml(event.venue)}` : ""}</p>
             ${cardUrl ? `<img src="${cardUrl}" alt="Kadi ya mwaliko" style="width:100%;border-radius:12px;margin:16px 0">` : ""}
-            ${rsvpUrl ? `<p><a href="${rsvpUrl}" style="background:#7a1f3d;color:#fff;padding:12px 24px;border-radius:24px;text-decoration:none">Thibitisha kuhudhuria</a></p>` : ""}
+            ${rsvpUrl ? `<p><a href="${rsvpUrl}" style="background:#FF7200;color:#fff;padding:12px 24px;border-radius:24px;text-decoration:none">Thibitisha kuhudhuria</a></p>` : ""}
           </div>`;
         result = await sendEmail(guest.email, `Mwaliko: ${event.title}`, html);
       }
