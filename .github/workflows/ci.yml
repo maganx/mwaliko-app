@@ -1,1 +1,55 @@
-# test
+# Ukaguzi wa kila PR na kila push kwenye main: analyze, tests za Flutter, SQL ya salio na edge functions.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.9
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+
+  supabase:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: SQL ya salio na RSVP
+        run: |
+          createdb mwtest
+          psql -d mwtest -v ON_ERROR_STOP=1 \
+            -f supabase/tests/supabase_stub.sql \
+            -f supabase/migrations/20261103000000_init.sql \
+            -f supabase/migrations/20261103120000_saas_billing.sql \
+            -f supabase/tests/billing_test.sql
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Edge functions (deno check)
+        run: deno check supabase/functions/*/index.ts

@@ -1,0 +1,92 @@
+# Inajenga app ya Android: AAB (kwa Google Play) na APK (kujaribu moja kwa moja kwenye simu).
+#
+# Repo variables (Settings > Secrets and variables > Actions > Variables), si lazima:
+#   SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, WEB_BASE_URL, SUPPORT_EMAIL, SUPPORT_PHONE
+#   Bila SUPABASE_URL app inajengwa kama demo.
+# Secrets za upload key (bila hizi release inasainiwa kwa debug key, haipakiki Play):
+#   ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+# Kupakia Play moja kwa moja (si lazima; tag v* au kwa mkono): PLAY_SERVICE_ACCOUNT_JSON
+name: Android
+
+on:
+  pull_request:
+    paths: ["lib/**", "android/**", "assets/**", "pubspec.*", ".github/workflows/android.yml"]
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      play_track:
+        description: "Pakia Google Play kwenye track hii"
+        required: false
+        default: none
+        type: choice
+        options: [none, internal, alpha, beta, production]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+      HAS_UPLOAD_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.9
+          channel: stable
+          cache: true
+
+      - name: Upload key ya Google Play
+        if: env.HAS_UPLOAD_KEY == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/upload-keystore.jks
+          {
+            echo "storeFile=upload-keystore.jks"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+
+      - name: Mipangilio ya kujenga
+        env:
+          WEB_BASE_URL: ${{ vars.WEB_BASE_URL }}
+          SUPPORT_EMAIL: ${{ vars.SUPPORT_EMAIL }}
+          SUPPORT_PHONE: ${{ vars.SUPPORT_PHONE }}
+        run: python3 tool/dart_defines.py build/defines.json
+
+      - name: AAB (Google Play)
+        run: flutter build appbundle --release --build-number=${{ github.run_number }} --dart-define-from-file=build/defines.json
+      - name: APK (kujaribu kwenye simu)
+        run: flutter build apk --release --build-number=${{ github.run_number }} --dart-define-from-file=build/defines.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: urinvente-android-${{ github.run_number }}
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+      - name: Pakia Google Play
+        if: >-
+          env.HAS_UPLOAD_KEY == 'true' &&
+          (startsWith(github.ref, 'refs/tags/v') || (inputs.play_track != '' && inputs.play_track != 'none'))
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.tembocloud.urinvente
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: ${{ (inputs.play_track != '' && inputs.play_track != 'none') && inputs.play_track || 'internal' }}
+          # App mpya ya Play inakubali release za "draft" tu; unazitoa (rollout) kwenye Play Console.
+          status: draft
