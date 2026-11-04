@@ -48,6 +48,7 @@ jobs:
             -f supabase/migrations/20261103000000_init.sql \
             -f supabase/migrations/20261103120000_saas_billing.sql \
             -f supabase/migrations/20261104120000_hardening.sql \
+            -f supabase/migrations/20261104130000_event_progress.sql \
             -f supabase/tests/billing_test.sql
       - uses: denoland/setup-deno@v2
         with:
