@@ -9,7 +9,10 @@ import 'supabase.dart';
 
 /// Kadi zinahifadhiwa kwenye bucket "cards":
 ///   {owner_id}/{event_id}/design-{time}.{ext}   design ya mteja
-///   {owner_id}/{event_id}/guests/{guest_id}.png kadi binafsi ya kila mwalikwa
+///   {owner_id}/{event_id}/photo-{time}.{ext}    picha ya mteja ndani ya template
+///   {owner_id}/{event_id}/guests/{guest_id}-{alama}.png kadi binafsi ya kila mwalikwa
+///     (alama = CardExporter.fingerprint: design au maelezo yakibadilika, kadi mpya inapata jina jipya;
+///     ya zamani inabaki ili email zilizokwisha tumwa zisipoteze picha)
 class CardsRepository {
   const CardsRepository();
 
@@ -19,9 +22,10 @@ class CardsRepository {
 
   String get _owner => AppConfig.demo ? 'demo' : currentUserId;
 
-  Future<String> uploadDesign(String eventId, Uint8List bytes, String extension) async {
+  /// [kind]: `design` (kadi nzima ya mteja) au `photo` (picha inayowekwa ndani ya template).
+  Future<String> uploadDesign(String eventId, Uint8List bytes, String extension, {String kind = 'design'}) async {
     final ext = extension.toLowerCase().replaceAll('.', '');
-    final path = '$_owner/$eventId/design-${DateTime.now().millisecondsSinceEpoch}.$ext';
+    final path = '$_owner/$eventId/$kind-${DateTime.now().millisecondsSinceEpoch}.$ext';
     if (AppConfig.demo) {
       _demo.files[path] = bytes;
       return path;
@@ -41,8 +45,8 @@ class CardsRepository {
     return sb.storage.from(bucket).download(path);
   }
 
-  Future<String> uploadGuestCard(String eventId, String guestId, Uint8List png) async {
-    final path = '$_owner/$eventId/guests/$guestId.png';
+  Future<String> uploadGuestCard(String eventId, String guestId, Uint8List png, {String? fingerprint}) async {
+    final path = '$_owner/$eventId/guests/$guestId${fingerprint == null ? '' : '-$fingerprint'}.png';
     if (AppConfig.demo) {
       _demo.files[path] = png;
       _demo.guests[guestId]!['card_path'] = path;
