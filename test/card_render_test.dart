@@ -110,7 +110,13 @@ void main() {
         home: Center(
           child: SizedBox(
             width: 300,
-            child: InvitationCard(event: _event, config: config, guestName: 'Mzee Juma', customImage: image, qrData: 'MWALIKO:abc'),
+            child: InvitationCard(
+              event: _event,
+              config: config,
+              guestName: 'Mzee Juma',
+              customImage: image,
+              qrData: 'MWALIKO:abc',
+            ),
           ),
         ),
       ),

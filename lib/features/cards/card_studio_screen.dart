@@ -59,7 +59,7 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
         _event = e;
         _config = e.cardConfig;
         _generated = CardGenerator(_seed).generateMany(_config, 6, eventType: e.eventType);
-        if (_config.isCustom) _customPreview = NetworkImage(_cards.publicUrl(_config.customImagePath!));
+        if (_config.isCustom) _customPreview = _cards.imageFor(_config.customImagePath!);
         if (_config.isCustom) _tabs.index = 2;
       });
     } catch (e) {
@@ -68,9 +68,9 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
   }
 
   void _regenerate() => setState(() {
-        _seed = Random().nextInt(1 << 31);
-        _generated = CardGenerator(_seed).generateMany(_config, 6, eventType: _event!.eventType);
-      });
+    _seed = Random().nextInt(1 << 31);
+    _generated = CardGenerator(_seed).generateMany(_config, 6, eventType: _event!.eventType);
+  });
 
   Future<void> _uploadDesign() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 2160, imageQuality: 92);
@@ -120,16 +120,28 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => _ExportDialog(event: _event!, guestsCount: guests.length, run: (onProgress, isCancelled) {
-        return CardExporter().exportAll(event: _event!, guests: guests, onProgress: onProgress, isCancelled: isCancelled);
-      }),
+      builder: (_) => _ExportDialog(
+        event: _event!,
+        guestsCount: guests.length,
+        run: (onProgress, isCancelled) {
+          return CardExporter().exportAll(
+            event: _event!,
+            guests: guests,
+            onProgress: onProgress,
+            isCancelled: isCancelled,
+          );
+        },
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     if (_loadError != null) {
-      return Scaffold(appBar: AppBar(), body: Center(child: Text(friendlyError(_loadError!))));
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(child: Text(friendlyError(_loadError!))),
+      );
     }
     final event = _event;
     if (event == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -139,24 +151,31 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
         title: const Text('Studio ya kadi'),
         bottom: TabBar(
           controller: _tabs,
-          tabs: const [Tab(text: 'Template'), Tab(text: 'Tengeneza mpya'), Tab(text: 'Design yangu')],
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
+          tabs: const [
+            Tab(text: 'Template'),
+            Tab(text: 'Tengeneza mpya'),
+            Tab(text: 'Design yangu'),
+          ],
         ),
       ),
       body: TabBarView(
         controller: _tabs,
         children: [
-          _grid(
-            [for (final t in curatedTemplates) (t.name, t.apply(_config))],
-          ),
+          _grid([for (final t in curatedTemplates) (t.name, t.apply(_config))]),
           Column(
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: Row(
                   children: [
-                    const Expanded(child: Text('Design hizi zimetengenezwa kwa ajili ya tukio lako. Hupendi? Tengeneza nyingine.')),
+                    const Expanded(
+                      child: Text('Design hizi zimetengenezwa kwa ajili ya tukio lako. Hupendi? Tengeneza nyingine.'),
+                    ),
                     const SizedBox(width: 8),
                     FilledButton.tonalIcon(
+                      style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
                       onPressed: _regenerate,
                       icon: const Icon(Icons.auto_awesome),
                       label: const Text('Nyingine'),
@@ -196,7 +215,7 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
                 child: FilledButton.icon(
                   onPressed: _saving ? null : _generateGuestCards,
                   icon: const Icon(Icons.collections_outlined),
-                  label: const Text('Tengeneza kadi za waalikwa'),
+                  label: const Text('Tengeneza kadi'),
                 ),
               ),
             ],
@@ -207,46 +226,51 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
   }
 
   Widget _grid(List<(String, CardConfig)> items) => GridView.builder(
-        padding: const EdgeInsets.all(12),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.68,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-        ),
-        itemCount: items.length,
-        itemBuilder: (_, i) {
-          final (name, c) = items[i];
-          final selected = !_config.isCustom &&
-              c.paletteId == _config.paletteId &&
-              c.ornamentId == _config.ornamentId &&
-              c.fontPairId == _config.fontPairId &&
-              c.layoutId == _config.layoutId;
-          return GestureDetector(
-            onTap: () => setState(() => _config = c.copyWith(mode: CardMode.template)),
-            child: Column(
-              children: [
-                Expanded(
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: selected ? MwalikoColors.maroon : Colors.transparent, width: 3),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: InvitationCard(event: _event!, config: c.copyWith(mode: CardMode.template)),
-                    ),
+    padding: const EdgeInsets.all(12),
+    // Simu: kadi 2 kwa mstari; skrini pana: zaidi.
+    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+      maxCrossAxisExtent: 240,
+      childAspectRatio: 0.68,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+    ),
+    itemCount: items.length,
+    itemBuilder: (_, i) {
+      final (name, c) = items[i];
+      final selected =
+          !_config.isCustom &&
+          c.paletteId == _config.paletteId &&
+          c.ornamentId == _config.ornamentId &&
+          c.fontPairId == _config.fontPairId &&
+          c.layoutId == _config.layoutId;
+      return GestureDetector(
+        onTap: () => setState(() => _config = c.copyWith(mode: CardMode.template)),
+        child: Column(
+          children: [
+            Expanded(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: selected ? MwalikoColors.primary : Colors.transparent, width: 3),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: InvitationCard(
+                    event: _event!,
+                    config: c.copyWith(mode: CardMode.template),
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
-              ],
+              ),
             ),
-          );
-        },
+            const SizedBox(height: 4),
+            Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+          ],
+        ),
       );
+    },
+  );
 
   Widget _customTab(EventModel event) {
     if (!_config.isCustom) {
@@ -256,7 +280,7 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.add_photo_alternate_outlined, size: 64, color: MwalikoColors.maroon),
+              const Icon(Icons.add_photo_alternate_outlined, size: 64, color: MwalikoColors.primary),
               const SizedBox(height: 12),
               const Text(
                 'Una kadi yako tayari? Pakia picha yake (PNG au JPG).\n'
@@ -345,7 +369,11 @@ class _CustomDesignEditorState extends State<_CustomDesignEditor> {
           ),
         ),
         const SizedBox(height: 8),
-        const Text('Gusa au buruta kwenye kadi kuweka kitu ulichochagua.', textAlign: TextAlign.center, style: TextStyle(fontSize: 12)),
+        const Text(
+          'Gusa au buruta kwenye kadi kuweka kitu ulichochagua.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12),
+        ),
         const SizedBox(height: 12),
         SegmentedButton<bool>(
           segments: const [
@@ -373,7 +401,7 @@ class _CustomDesignEditorState extends State<_CustomDesignEditor> {
                 onTap: () => widget.onChanged(c.copyWith(nameColor: col)),
                 child: CircleAvatar(
                   radius: 17,
-                  backgroundColor: c.nameColor == col ? MwalikoColors.maroon : Colors.grey.shade300,
+                  backgroundColor: c.nameColor == col ? MwalikoColors.primary : Colors.grey.shade300,
                   child: CircleAvatar(radius: 14, backgroundColor: Color(col)),
                 ),
               ),
@@ -403,10 +431,19 @@ class _CustomDesignEditorState extends State<_CustomDesignEditor> {
         ),
         if (c.showQr) ...[
           Text('Ukubwa wa QR', style: Theme.of(context).textTheme.labelLarge),
-          Slider(value: c.qrSize, min: 0.1, max: 0.3, onChanged: (v) => widget.onChanged(c.copyWith(qrSize: v))),
+          Slider(
+            value: c.qrSize,
+            min: 0.1,
+            max: 0.3,
+            onChanged: (v) => widget.onChanged(c.copyWith(qrSize: v)),
+          ),
         ],
         const SizedBox(height: 8),
-        OutlinedButton.icon(onPressed: widget.onReplace, icon: const Icon(Icons.swap_horiz), label: const Text('Badilisha picha')),
+        OutlinedButton.icon(
+          onPressed: widget.onReplace,
+          icon: const Icon(Icons.swap_horiz),
+          label: const Text('Badilisha picha'),
+        ),
       ],
     );
   }
@@ -437,10 +474,11 @@ class _ExportDialogState extends State<_ExportDialog> {
           if (mounted) setState(() => _done = d);
         }, () => _cancelled)
         .then((_) {
-      if (mounted) setState(() => _finished = true);
-    }).catchError((Object e) {
-      if (mounted) setState(() => _error = friendlyError(e));
-    });
+          if (mounted) setState(() => _finished = true);
+        })
+        .catchError((Object e) {
+          if (mounted) setState(() => _error = friendlyError(e));
+        });
   }
 
   @override

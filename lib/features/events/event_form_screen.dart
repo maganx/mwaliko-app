@@ -3,10 +3,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/event_types.dart';
 import '../../core/swahili_time.dart';
+import '../../core/theme.dart';
 import '../../data/events_repository.dart';
 import '../../models/card_config.dart';
 import '../../models/event.dart';
 import '../../widgets/async_view.dart';
+import '../../widgets/ui.dart';
 
 /// Kuunda au kuhariri tukio.
 class EventFormScreen extends StatefulWidget {
@@ -116,6 +118,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(title: Text(_isEdit ? 'Hariri tukio' : 'Tukio jipya')),
       body: _loading
@@ -123,70 +126,113 @@ class _EventFormScreenState extends State<EventFormScreen> {
           : Form(
               key: _form,
               child: ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
                 children: [
-                  DropdownButtonFormField<String>(
-                    initialValue: _type,
-                    decoration: const InputDecoration(labelText: 'Aina ya tukio'),
-                    items: [
-                      for (final t in eventTypes) DropdownMenuItem(value: t.id, child: Text(t.label)),
+                  const SectionHeader('Aina ya tukio'),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final e in eventTypes)
+                        ChoiceChip(
+                          showCheckmark: false,
+                          label: Text(e.label),
+                          selected: _type == e.id,
+                          onSelected: (_) => setState(() => _type = e.id),
+                        ),
                     ],
-                    onChanged: (v) => setState(() => _type = v ?? _type),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 20),
+                  const SectionHeader('Maelezo makuu'),
                   TextFormField(
                     controller: _title,
-                    decoration: const InputDecoration(labelText: 'Jina la tukio', hintText: 'mf. Harusi ya Amani & Neema'),
+                    textCapitalization: TextCapitalization.words,
+                    decoration: const InputDecoration(
+                      labelText: 'Jina la tukio',
+                      hintText: 'mf. Harusi ya Amani & Neema',
+                      prefixIcon: Icon(Icons.celebration_outlined),
+                    ),
                     validator: (v) => (v == null || v.trim().isEmpty) ? 'Weka jina la tukio' : null,
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _hosts,
-                    decoration: const InputDecoration(labelText: 'Wenyeji', hintText: 'mf. Familia ya Bw. na Bi. Juma'),
-                  ),
-                  const SizedBox(height: 12),
-                  ListTile(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      side: BorderSide(color: Colors.brown.shade100),
+                    textCapitalization: TextCapitalization.words,
+                    decoration: const InputDecoration(
+                      labelText: 'Wenyeji',
+                      hintText: 'mf. Familia ya Bw. na Bi. Juma',
+                      prefixIcon: Icon(Icons.family_restroom),
                     ),
-                    tileColor: Colors.white,
-                    leading: const Icon(Icons.calendar_month),
-                    title: Text(swahiliDate(_date)),
-                    subtitle: Text(swahiliTime(_date)),
-                    trailing: const Icon(Icons.edit_calendar),
-                    onTap: _pickDate,
                   ),
                   const SizedBox(height: 12),
+                  SoftCard(
+                    onTap: _pickDate,
+                    child: Row(
+                      children: [
+                        const IconBadge(Icons.calendar_month, size: 42),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(swahiliDate(_date), style: t.titleSmall),
+                              Text(swahiliTime(_date), style: t.bodySmall),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.edit_calendar, color: MwalikoColors.primary),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const SectionHeader('Mahali'),
                   TextFormField(
                     controller: _venue,
-                    decoration: const InputDecoration(labelText: 'Ukumbi / mahali', hintText: 'mf. Mlimani City Hall'),
+                    decoration: const InputDecoration(
+                      labelText: 'Ukumbi / mahali',
+                      hintText: 'mf. Mlimani City Hall',
+                      prefixIcon: Icon(Icons.place_outlined),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _map,
                     keyboardType: TextInputType.url,
-                    decoration: const InputDecoration(labelText: 'Link ya Google Maps (si lazima)'),
+                    decoration: const InputDecoration(
+                      labelText: 'Link ya Google Maps (si lazima)',
+                      prefixIcon: Icon(Icons.map_outlined),
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(controller: _dress, decoration: const InputDecoration(labelText: 'Mavazi (si lazima)')),
+                  const SizedBox(height: 20),
+                  const SectionHeader('Ziada (si lazima)'),
+                  TextFormField(
+                    controller: _dress,
+                    decoration: const InputDecoration(labelText: 'Mavazi', prefixIcon: Icon(Icons.checkroom)),
+                  ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _contact,
                     keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(labelText: 'Simu ya mawasiliano (si lazima)'),
+                    decoration: const InputDecoration(
+                      labelText: 'Simu ya mawasiliano',
+                      prefixIcon: Icon(Icons.phone_outlined),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _message,
                     maxLines: 3,
                     maxLength: 240,
-                    decoration: const InputDecoration(labelText: 'Ujumbe wa ziada kwenye kadi (si lazima)'),
+                    decoration: const InputDecoration(
+                      labelText: 'Ujumbe wa ziada kwenye kadi',
+                      prefixIcon: Icon(Icons.notes),
+                      alignLabelWithHint: true,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   FilledButton(
                     onPressed: _saving ? null : _save,
-                    child: Text(_saving ? 'Inahifadhi…' : 'Hifadhi'),
+                    child: Text(_saving ? 'Inahifadhi…' : (_isEdit ? 'Hifadhi mabadiliko' : 'Unda tukio')),
                   ),
                 ],
               ),

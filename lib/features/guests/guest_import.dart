@@ -17,7 +17,9 @@ class ImportResult {
 /// Safu ya kwanza inaweza kuwa vichwa (Jina/Name, Simu/Phone, ...). Kama hakuna vichwa,
 /// mpangilio unaodhaniwa ni Jina, Simu, Email, Idadi.
 ImportResult parseGuestFile(Uint8List bytes, String fileName) {
-  final rows = fileName.toLowerCase().endsWith('.csv') ? _csvRows(utf8.decode(bytes, allowMalformed: true)) : _xlsxRows(bytes);
+  final rows = fileName.toLowerCase().endsWith('.csv')
+      ? _csvRows(utf8.decode(bytes, allowMalformed: true))
+      : _xlsxRows(bytes);
   return parseGuestRows(rows);
 }
 
@@ -31,12 +33,12 @@ List<List<String>> _xlsxRows(Uint8List bytes) {
 }
 
 String _cellText(CellValue? v) => switch (v) {
-      null => '',
-      TextCellValue(:final value) => value.toString(),
-      IntCellValue(:final value) => '$value',
-      DoubleCellValue(:final value) => value == value.roundToDouble() ? '${value.toInt()}' : '$value',
-      _ => v.toString(),
-    };
+  null => '',
+  TextCellValue(:final value) => value.toString(),
+  IntCellValue(:final value) => '$value',
+  DoubleCellValue(:final value) => value == value.roundToDouble() ? '${value.toInt()}' : '$value',
+  _ => v.toString(),
+};
 
 /// CSV rahisi: inaheshimu "nukuu" na koma/semicolon.
 List<List<String>> _csvRows(String text) {
@@ -112,13 +114,9 @@ ImportResult parseGuestRows(List<List<String>> rows) {
     }
     final seats = int.tryParse(cell(r, seatsCol)) ?? 1;
     final cat = cell(r, catCol);
-    out.add(GuestDraft(
-      name: name,
-      phone: phone,
-      email: email,
-      seats: seats.clamp(1, 20),
-      category: cat.isEmpty ? null : cat,
-    ));
+    out.add(
+      GuestDraft(name: name, phone: phone, email: email, seats: seats.clamp(1, 20), category: cat.isEmpty ? null : cat),
+    );
   }
   return ImportResult(out, skipped);
 }

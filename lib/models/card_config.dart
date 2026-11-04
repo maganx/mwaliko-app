@@ -59,29 +59,27 @@ class CardConfig {
     bool? showQr,
     Offset? qrPosition,
     double? qrSize,
-  }) =>
-      CardConfig(
-        mode: mode ?? this.mode,
-        paletteId: paletteId ?? this.paletteId,
-        ornamentId: ornamentId ?? this.ornamentId,
-        fontPairId: fontPairId ?? this.fontPairId,
-        layoutId: layoutId ?? this.layoutId,
-        customImagePath: customImagePath ?? this.customImagePath,
-        customAspect: customAspect ?? this.customAspect,
-        namePosition: namePosition ?? this.namePosition,
-        nameSize: nameSize ?? this.nameSize,
-        nameColor: nameColor ?? this.nameColor,
-        nameFont: nameFont ?? this.nameFont,
-        showQr: showQr ?? this.showQr,
-        qrPosition: qrPosition ?? this.qrPosition,
-        qrSize: qrSize ?? this.qrSize,
-      );
+  }) => CardConfig(
+    mode: mode ?? this.mode,
+    paletteId: paletteId ?? this.paletteId,
+    ornamentId: ornamentId ?? this.ornamentId,
+    fontPairId: fontPairId ?? this.fontPairId,
+    layoutId: layoutId ?? this.layoutId,
+    customImagePath: customImagePath ?? this.customImagePath,
+    customAspect: customAspect ?? this.customAspect,
+    namePosition: namePosition ?? this.namePosition,
+    nameSize: nameSize ?? this.nameSize,
+    nameColor: nameColor ?? this.nameColor,
+    nameFont: nameFont ?? this.nameFont,
+    showQr: showQr ?? this.showQr,
+    qrPosition: qrPosition ?? this.qrPosition,
+    qrSize: qrSize ?? this.qrSize,
+  );
 
   factory CardConfig.fromJson(Map<String, dynamic>? j) {
     if (j == null || j.isEmpty) return const CardConfig();
     double d(Object? v, double fb) => v is num ? v.toDouble() : fb;
-    Offset o(Object? v, Offset fb) =>
-        v is List && v.length == 2 ? Offset(d(v[0], fb.dx), d(v[1], fb.dy)) : fb;
+    Offset o(Object? v, Offset fb) => v is List && v.length == 2 ? Offset(d(v[0], fb.dx), d(v[1], fb.dy)) : fb;
     const fb = CardConfig();
     return CardConfig(
       mode: j['mode'] == 'custom' ? CardMode.custom : CardMode.template,
@@ -102,21 +100,21 @@ class CardConfig {
   }
 
   Map<String, dynamic> toJson() => {
-        'mode': mode.name,
-        'palette': paletteId,
-        'ornament': ornamentId,
-        'fonts': fontPairId,
-        'layout': layoutId,
-        if (customImagePath != null) 'custom_image_path': customImagePath,
-        'custom_aspect': customAspect,
-        'name_pos': [namePosition.dx, namePosition.dy],
-        'name_size': nameSize,
-        'name_color': nameColor,
-        'name_font': nameFont,
-        'show_qr': showQr,
-        'qr_pos': [qrPosition.dx, qrPosition.dy],
-        'qr_size': qrSize,
-      };
+    'mode': mode.name,
+    'palette': paletteId,
+    'ornament': ornamentId,
+    'fonts': fontPairId,
+    'layout': layoutId,
+    if (customImagePath != null) 'custom_image_path': customImagePath,
+    'custom_aspect': customAspect,
+    'name_pos': [namePosition.dx, namePosition.dy],
+    'name_size': nameSize,
+    'name_color': nameColor,
+    'name_font': nameFont,
+    'show_qr': showQr,
+    'qr_pos': [qrPosition.dx, qrPosition.dy],
+    'qr_size': qrSize,
+  };
 }
 
 enum CardMode { template, custom }

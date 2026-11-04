@@ -10,31 +10,31 @@ class AsyncView<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FutureBuilder<T>(
-        future: future,
-        builder: (context, snap) {
-          if (snap.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.wifi_off_rounded, size: 40),
-                    const SizedBox(height: 12),
-                    Text('Imeshindikana kupakia.\n${snap.error}', textAlign: TextAlign.center),
-                    if (onRetry != null) ...[
-                      const SizedBox(height: 12),
-                      OutlinedButton(onPressed: onRetry, child: const Text('Jaribu tena')),
-                    ],
-                  ],
-                ),
-              ),
-            );
-          }
-          if (!snap.hasData) return const Center(child: CircularProgressIndicator());
-          return builder(context, snap.data as T);
-        },
-      );
+    future: future,
+    builder: (context, snap) {
+      if (snap.hasError) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.wifi_off_rounded, size: 40),
+                const SizedBox(height: 12),
+                Text('Imeshindikana kupakia.\n${snap.error}', textAlign: TextAlign.center),
+                if (onRetry != null) ...[
+                  const SizedBox(height: 12),
+                  OutlinedButton(onPressed: onRetry, child: const Text('Jaribu tena')),
+                ],
+              ],
+            ),
+          ),
+        );
+      }
+      if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+      return builder(context, snap.data as T);
+    },
+  );
 }
 
 void showSnack(BuildContext context, String message) {

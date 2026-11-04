@@ -16,5 +16,4 @@ const eventTypes = <EventType>[
   EventType('other', 'Tukio Lingine', 'Mwaliko'),
 ];
 
-EventType eventTypeById(String id) =>
-    eventTypes.firstWhere((t) => t.id == id, orElse: () => eventTypes.last);
+EventType eventTypeById(String id) => eventTypes.firstWhere((t) => t.id == id, orElse: () => eventTypes.last);

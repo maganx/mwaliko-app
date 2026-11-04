@@ -80,13 +80,39 @@ Deno.serve(async (req) => {
   const { data: guests, error: guestsError } = await guestQuery;
   if (guestsError) return json({ error: guestsError.message }, 500);
 
+  // Kukata salio: TSh kwa kila mwalikwa ambaye hajawahi kutozwa (kumtumia tena ni bure).
+  // Anayetozwa ni yule tu anayefikiwa kwa angalau njia moja iliyochaguliwa.
+  const reachable = (g: { phone?: string | null; email?: string | null }) =>
+    channels.some((c) => (c === "email" ? !!g.email : !!g.phone));
+  const guestIds = (guests ?? []).filter(reachable).map((g) => g.id);
+  let charged = 0;
+  if (guestIds.length > 0) {
+    const { data: n, error: chargeError } = await userClient.rpc("consume_credits", {
+      p_event_id: event.id,
+      p_guest_ids: guestIds,
+    });
+    if (chargeError) {
+      const m = /insufficient_credits:(\d+):(\d+)/.exec(chargeError.message);
+      if (m) {
+        return json({
+          error: "insufficient_credits",
+          message: `Salio halitoshi: unahitaji mialiko ${m[1]}, una ${m[2]}. Ongeza salio kwanza.`,
+          needed: Number(m[1]),
+          balance: Number(m[2]),
+        }, 402);
+      }
+      return json({ error: chargeError.message }, 500);
+    }
+    charged = Number(n ?? 0);
+  }
+
   const rsvpBase = Deno.env.get("RSVP_BASE_URL") ?? "";
   const publicUrl = (path?: string | null) =>
     path ? admin.storage.from("cards").getPublicUrl(path).data.publicUrl : undefined;
   const eventDate = formatDate(event.event_date);
   const hosts = event.host_names ? `${event.host_names} ` : "";
 
-  const summary = { sent: 0, failed: 0, skipped: 0, results: [] as unknown[] };
+  const summary = { sent: 0, failed: 0, skipped: 0, charged, results: [] as unknown[] };
 
   for (const guest of guests ?? []) {
     const rsvpUrl = rsvpBase ? `${rsvpBase}?t=${guest.rsvp_token}` : "";
@@ -118,7 +144,7 @@ Deno.serve(async (req) => {
             <h2 style="margin:8px 0">${escapeHtml(event.title)}</h2>
             <p>${escapeHtml(eventDate)}${event.venue ? `<br>${escapeHtml(event.venue)}` : ""}</p>
             ${cardUrl ? `<img src="${cardUrl}" alt="Kadi ya mwaliko" style="width:100%;border-radius:12px;margin:16px 0">` : ""}
-            ${rsvpUrl ? `<p><a href="${rsvpUrl}" style="background:#7a1f3d;color:#fff;padding:12px 24px;border-radius:24px;text-decoration:none">Thibitisha kuhudhuria</a></p>` : ""}
+            ${rsvpUrl ? `<p><a href="${rsvpUrl}" style="background:#FF7200;color:#fff;padding:12px 24px;border-radius:24px;text-decoration:none">Thibitisha kuhudhuria</a></p>` : ""}
           </div>`;
         result = await sendEmail(guest.email, `Mwaliko: ${event.title}`, html);
       }
