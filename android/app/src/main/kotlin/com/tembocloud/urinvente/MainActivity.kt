@@ -1,4 +1,4 @@
-package tz.co.mwaliko.mwaliko
+package com.tembocloud.urinvente
 
 import io.flutter.embedding.android.FlutterActivity
 

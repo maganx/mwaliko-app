@@ -173,7 +173,9 @@ class _WalletScreenState extends State<WalletScreen> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Mwalikwa 1 = mwaliko 1 · ${formatTzs(p.pricePerGuest)} kwa mwalikwa',
+                            AppConfig.canBuyCredits
+                                ? 'Mwalikwa 1 = mwaliko 1 · ${formatTzs(p.pricePerGuest)} kwa mwalikwa'
+                                : 'Mwalikwa 1 = mwaliko 1',
                             style: TextStyle(color: MwalikoColors.muted, fontSize: 13),
                           ),
                         ],
@@ -195,110 +197,112 @@ class _WalletScreenState extends State<WalletScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const SectionHeader('Nunua mialiko'),
-                        GridView.count(
-                          crossAxisCount: 3,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          mainAxisSpacing: 10,
-                          crossAxisSpacing: 10,
-                          childAspectRatio: 0.92,
-                          children: [
-                            for (final n in p.packages)
-                              _PackageCard(
-                                credits: n,
-                                price: p.priceFor(n),
-                                selected: _custom.text.isEmpty && _selected == n,
-                                popular: n == 200,
-                                onTap: () => setState(() {
-                                  _custom.clear();
-                                  _selected = n;
-                                }),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _custom,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                          onChanged: (_) => setState(() {}),
-                          decoration: InputDecoration(
-                            labelText: 'Au weka idadi unayotaka',
-                            hintText: 'mf. 350',
-                            helperText: 'Kima cha chini ni mialiko ${p.minPurchase}',
-                            prefixIcon: const Icon(Icons.edit_outlined),
-                            suffixText: 'mialiko',
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-                        Text('Njia ya malipo', style: t.titleMedium),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            for (final m in PaymentMethod.values)
-                              ChoiceChip(
-                                label: Text(m.label),
-                                selected: _method == m,
-                                showCheckmark: false,
-                                avatar: Icon(
-                                  m == PaymentMethod.bank ? Icons.account_balance_outlined : Icons.phone_android,
-                                  size: 18,
-                                  color: _method == m ? Colors.white : MwalikoColors.primary,
-                                ),
-                                onSelected: (_) => setState(() => _method = m),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-                        SoftCard(
-                          color: MwalikoColors.accentSoft,
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        if (AppConfig.canBuyCredits) ...[
+                          const SectionHeader('Nunua mialiko'),
+                          GridView.count(
+                            crossAxisCount: 3,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            mainAxisSpacing: 10,
+                            crossAxisSpacing: 10,
+                            childAspectRatio: 0.92,
                             children: [
-                              const Icon(Icons.info_outline, color: MwalikoColors.primary),
-                              const SizedBox(width: 10),
-                              Expanded(child: Text(p.paymentInstructions, style: t.bodyMedium)),
+                              for (final n in p.packages)
+                                _PackageCard(
+                                  credits: n,
+                                  price: p.priceFor(n),
+                                  selected: _custom.text.isEmpty && _selected == n,
+                                  popular: n == 200,
+                                  onTap: () => setState(() {
+                                    _custom.clear();
+                                    _selected = n;
+                                  }),
+                                ),
                             ],
                           ),
-                        ),
-                        const SizedBox(height: 14),
-                        if (_method != PaymentMethod.bank) ...[
-                          TextFormField(
-                            controller: _phone,
-                            keyboardType: TextInputType.phone,
-                            decoration: const InputDecoration(
-                              labelText: 'Namba uliyolipia',
-                              hintText: '0712 345 678',
-                              prefixIcon: Icon(Icons.phone_outlined),
-                            ),
-                            validator: (v) =>
-                                (v ?? '').trim().isEmpty || normalizePhone(v!) != null ? null : 'Namba si sahihi',
-                          ),
                           const SizedBox(height: 12),
-                        ],
-                        TextFormField(
-                          controller: _reference,
-                          textCapitalization: TextCapitalization.characters,
-                          decoration: const InputDecoration(
-                            labelText: 'Namba ya muamala (transaction ID)',
-                            hintText: 'mf. SKD81HQ2P1',
-                            prefixIcon: Icon(Icons.tag),
+                          TextField(
+                            controller: _custom,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            onChanged: (_) => setState(() {}),
+                            decoration: InputDecoration(
+                              labelText: 'Au weka idadi unayotaka',
+                              hintText: 'mf. 350',
+                              helperText: 'Kima cha chini ni mialiko ${p.minPurchase}',
+                              prefixIcon: const Icon(Icons.edit_outlined),
+                              suffixText: 'mialiko',
+                            ),
                           ),
-                          validator: (v) => AppConfig.demo || (v ?? '').trim().length >= 6
-                              ? null
-                              : 'Weka namba ya muamala uliyopokea kwenye SMS',
-                        ),
-                        const SizedBox(height: 18),
-                        _TotalBar(
-                          quantity: valid ? qty : null,
-                          amount: valid ? p.priceFor(qty) : null,
-                          busy: _busy,
-                          onPay: () => _pay(p),
-                        ),
-                        if (d.payments.isNotEmpty) ...[
+                          const SizedBox(height: 18),
+                          Text('Njia ya malipo', style: t.titleMedium),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              for (final m in PaymentMethod.values)
+                                ChoiceChip(
+                                  label: Text(m.label),
+                                  selected: _method == m,
+                                  showCheckmark: false,
+                                  avatar: Icon(
+                                    m == PaymentMethod.bank ? Icons.account_balance_outlined : Icons.phone_android,
+                                    size: 18,
+                                    color: _method == m ? Colors.white : MwalikoColors.primary,
+                                  ),
+                                  onSelected: (_) => setState(() => _method = m),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          SoftCard(
+                            color: MwalikoColors.accentSoft,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(Icons.info_outline, color: MwalikoColors.primary),
+                                const SizedBox(width: 10),
+                                Expanded(child: Text(p.paymentInstructions, style: t.bodyMedium)),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          if (_method != PaymentMethod.bank) ...[
+                            TextFormField(
+                              controller: _phone,
+                              keyboardType: TextInputType.phone,
+                              decoration: const InputDecoration(
+                                labelText: 'Namba uliyolipia',
+                                hintText: '0712 345 678',
+                                prefixIcon: Icon(Icons.phone_outlined),
+                              ),
+                              validator: (v) =>
+                                  (v ?? '').trim().isEmpty || normalizePhone(v!) != null ? null : 'Namba si sahihi',
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                          TextFormField(
+                            controller: _reference,
+                            textCapitalization: TextCapitalization.characters,
+                            decoration: const InputDecoration(
+                              labelText: 'Namba ya muamala (transaction ID)',
+                              hintText: 'mf. SKD81HQ2P1',
+                              prefixIcon: Icon(Icons.tag),
+                            ),
+                            validator: (v) => AppConfig.demo || (v ?? '').trim().length >= 6
+                                ? null
+                                : 'Weka namba ya muamala uliyopokea kwenye SMS',
+                          ),
+                          const SizedBox(height: 18),
+                          _TotalBar(
+                            quantity: valid ? qty : null,
+                            amount: valid ? p.priceFor(qty) : null,
+                            busy: _busy,
+                            onPay: () => _pay(p),
+                          ),
+                        ],
+                        if (d.payments.isNotEmpty && AppConfig.canBuyCredits) ...[
                           const SizedBox(height: 28),
                           const SectionHeader('Malipo yako'),
                           SoftCard(
@@ -306,7 +310,7 @@ class _WalletScreenState extends State<WalletScreen> {
                             child: Column(children: [for (final x in d.payments) _PaymentRow(x)]),
                           ),
                         ],
-                        const SizedBox(height: 28),
+                        if (AppConfig.canBuyCredits) const SizedBox(height: 28),
                         const SectionHeader('Matumizi ya salio'),
                         if (d.transactions.isEmpty)
                           SoftCard(child: Text('Bado hakuna matumizi.', style: t.bodyMedium))

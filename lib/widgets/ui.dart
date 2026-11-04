@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../core/config.dart';
 import '../core/money.dart';
 import '../core/theme.dart';
 import '../models/event.dart';
@@ -128,15 +129,20 @@ class IconBadge extends StatelessWidget {
   final Color color;
   final double size;
 
+  // Align: ikoni inabaki mraba hata ikiwekwa mahali panaponyoosha upana (mf. icon ya AlertDialog).
   @override
-  Widget build(BuildContext context) => Container(
-    width: size,
-    height: size,
-    decoration: BoxDecoration(
-      color: color == Colors.white ? Colors.white.withValues(alpha: 0.22) : Colors.white.withValues(alpha: 0.7),
-      borderRadius: BorderRadius.circular(size * 0.34),
+  Widget build(BuildContext context) => Align(
+    widthFactor: 1,
+    heightFactor: 1,
+    child: Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color == Colors.white ? Colors.white.withValues(alpha: 0.22) : Colors.white.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(size * 0.34),
+      ),
+      child: Icon(icon, color: color, size: size * 0.5),
     ),
-    child: Icon(icon, color: color, size: size * 0.5),
   );
 }
 
@@ -285,13 +291,15 @@ class BalanceCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Thamani ${formatTzs(credits * pricePerGuest)} · ${formatTzs(pricePerGuest)} kwa mwalikwa',
+                    AppConfig.canBuyCredits
+                        ? 'Thamani ${formatTzs(credits * pricePerGuest)} · ${formatTzs(pricePerGuest)} kwa mwalikwa'
+                        : 'Mwaliko 1 kwa kila mwalikwa',
                     style: TextStyle(fontSize: 11.5, color: MwalikoColors.muted),
                   ),
                 ],
               ),
             ),
-            if (onTopUp != null)
+            if (onTopUp != null && AppConfig.canBuyCredits)
               FilledButton.icon(
                 onPressed: onTopUp,
                 style: FilledButton.styleFrom(

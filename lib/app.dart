@@ -44,7 +44,8 @@ class _MwalikoAppState extends State<MwalikoApp> {
       theme: buildTheme(),
       routerConfig: _router,
       // Asili ya aqua iko nyuma ya kila skrini (scaffold ni wazi).
-      builder: (context, child) => BrandBackground(child: AppConfig.demo ? _DemoFrame(child: child!) : child!),
+      builder: (context, child) =>
+          BrandBackground(child: AppConfig.demo && AppConfig.demoBanner ? _DemoFrame(child: child!) : child!),
       locale: const Locale('sw'),
       supportedLocales: const [Locale('sw'), Locale('en')],
       localizationsDelegates: const [
@@ -65,6 +66,8 @@ GoRouter _buildRouter() {
       final atLogin = state.matchedLocation == '/login';
       if (!auth.isSignedIn) return atLogin ? null : '/login';
       if (atLogin) return '/';
+      // App ya iPhone haina manunuzi ndani yake (angalia AppConfig.canBuyCredits).
+      if (state.matchedLocation == '/topup' && !AppConfig.canBuyCredits) return '/wallet';
       return null;
     },
     routes: _routes,

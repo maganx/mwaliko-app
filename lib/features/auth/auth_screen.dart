@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/config.dart';
+import '../../core/links.dart';
 import '../../core/phone.dart';
 import '../../core/theme.dart';
 import '../../data/auth_repository.dart';
@@ -200,6 +201,27 @@ class _AuthScreenState extends State<AuthScreen> {
                                         )
                                       : Text(_signUp ? 'Fungua akaunti' : 'Ingia'),
                                 ),
+                                if (_signUp) ...[
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    'Kwa kufungua akaunti unakubali masharti ya matumizi na sera ya faragha.',
+                                    textAlign: TextAlign.center,
+                                    style: textTheme.bodySmall,
+                                  ),
+                                  Wrap(
+                                    alignment: WrapAlignment.center,
+                                    children: [
+                                      TextButton(
+                                        onPressed: () => openLink(context, AppConfig.termsUrl),
+                                        child: const Text('Masharti'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () => openLink(context, AppConfig.privacyUrl),
+                                        child: const Text('Sera ya faragha'),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                                 const SizedBox(height: 10),
                                 Wrap(
                                   alignment: WrapAlignment.center,
