@@ -19,16 +19,30 @@ const cors = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
 
+const SIKU = ["Jumapili", "Jumatatu", "Jumanne", "Jumatano", "Alhamisi", "Ijumaa", "Jumamosi"];
+const MIEZI = [
+  "Januari", "Februari", "Machi", "Aprili", "Mei", "Juni",
+  "Julai", "Agosti", "Septemba", "Oktoba", "Novemba", "Desemba",
+];
+
+// "Jumamosi, 12 Desemba 2026, saa 10:00 jioni" (sawa na invitationDate() ya app, lib/core/invitation_text.dart).
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString("sw-TZ", {
-    timeZone: Deno.env.get("EVENT_TIMEZONE") ?? "Africa/Dar_es_Salaam",
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: Deno.env.get("EVENT_TIMEZONE") ?? "Africa/Dar_es_Salaam",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(new Date(iso)).map((p) => [p.type, p.value]),
+  );
+  const [y, mo, d, h, mi] = [parts.year, parts.month, parts.day, parts.hour, parts.minute].map(Number);
+  const weekday = SIKU[new Date(Date.UTC(y, mo - 1, d)).getUTCDay()];
+  const swHour = (h + 6) % 12 || 12;
+  const period = h >= 5 && h < 12 ? "asubuhi" : h >= 12 && h < 16 ? "mchana" : h >= 16 && h < 19 ? "jioni" : "usiku";
+  return `${weekday}, ${d} ${MIEZI[mo - 1]} ${y}, saa ${swHour}:${String(mi).padStart(2, "0")} ${period}`;
 }
 
 const escapeHtml = (s: string) =>
@@ -106,11 +120,11 @@ Deno.serve(async (req) => {
     charged = Number(n ?? 0);
   }
 
-  const rsvpBase = Deno.env.get("RSVP_BASE_URL") ?? "";
+  const rsvpBase = Deno.env.get("RSVP_BASE_URL") ?? "https://maganx.github.io/mwaliko-app/rsvp/";
   const publicUrl = (path?: string | null) =>
     path ? admin.storage.from("cards").getPublicUrl(path).data.publicUrl : undefined;
   const eventDate = formatDate(event.event_date);
-  const hosts = event.host_names ? `${event.host_names} ` : "";
+  const hosts = event.host_names?.trim() ? `${event.host_names.trim()} ` : "";
 
   const summary = { sent: 0, failed: 0, skipped: 0, charged, results: [] as unknown[] };
 

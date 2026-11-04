@@ -6,6 +6,7 @@ import '../../core/swahili_time.dart';
 import '../../core/theme.dart';
 import '../../data/events_repository.dart';
 import '../../models/event.dart';
+import '../../models/event_progress.dart';
 import '../../widgets/async_view.dart';
 import '../../widgets/ui.dart';
 import 'event_tile.dart';
@@ -63,6 +64,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         onRetry: _reload,
         builder: (context, data) {
           final (event, stats) = data;
+          final progress = EventProgress(event, stats);
           final t = Theme.of(context).textTheme;
           final days = event.eventDate.difference(DateTime.now()).inDays;
           final past = event.eventDate.isBefore(DateTime.now());
@@ -188,35 +190,22 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           crossAxisSpacing: 12,
                           childAspectRatio: 1.25,
                           children: [
-                            _ActionCard(
-                              step: 1,
-                              icon: Icons.palette_outlined,
-                              title: 'Kadi',
-                              subtitle: event.cardConfig.isCustom ? 'Design yako' : 'Chagua design',
-                              onTap: () => _open('card'),
-                            ),
-                            _ActionCard(
-                              step: 2,
-                              icon: Icons.people_alt_outlined,
-                              title: 'Waalikwa',
-                              subtitle: stats.guests == 0 ? 'Ongeza wageni' : '${stats.guests} wameongezwa',
-                              onTap: () => _open('guests'),
-                            ),
-                            _ActionCard(
-                              step: 3,
-                              icon: Icons.send_outlined,
-                              title: 'Tuma',
-                              subtitle: 'SMS, WhatsApp, email',
-                              onTap: () => _open('send'),
-                              highlight: true,
-                            ),
-                            _ActionCard(
-                              step: 4,
-                              icon: Icons.qr_code_scanner,
-                              title: 'Check-in',
-                              subtitle: 'Skani QR mlangoni',
-                              onTap: () => _open('checkin'),
-                            ),
+                            for (final step in EventStep.values)
+                              _ActionCard(
+                                step: step,
+                                icon: _stepIcons[step]!,
+                                subtitle: _stepSubtitle(step, event, stats),
+                                state: !progress.isUnlocked(step)
+                                    ? _StepState.locked
+                                    : progress.current == step
+                                    ? _StepState.current
+                                    : progress.isDone(step)
+                                    ? _StepState.done
+                                    : _StepState.open,
+                                onTap: () => progress.isUnlocked(step)
+                                    ? _open(step.path)
+                                    : showSnack(context, progress.lockedMessage(step)),
+                              ),
                           ],
                         ),
                       ),
@@ -311,62 +300,101 @@ class _Stat extends StatelessWidget {
   );
 }
 
+const _stepIcons = {
+  EventStep.card: Icons.palette_outlined,
+  EventStep.guests: Icons.people_alt_outlined,
+  EventStep.send: Icons.send_outlined,
+  EventStep.checkin: Icons.qr_code_scanner,
+};
+
+String _stepSubtitle(EventStep step, EventModel event, EventStats stats) => switch (step) {
+  EventStep.card =>
+    !event.cardConfig.chosen
+        ? 'Chagua design'
+        : event.cardConfig.isCustom
+        ? 'Design yako'
+        : 'Design imechaguliwa',
+  EventStep.guests => stats.guests == 0 ? 'Ongeza wageni' : '${stats.guests} wameongezwa',
+  EventStep.send => stats.invited == 0 ? 'SMS, WhatsApp, email' : '${stats.invited} wametumiwa',
+  EventStep.checkin => stats.checkedIn == 0 ? 'Skani QR mlangoni' : '${stats.checkedIn} wameingia',
+};
+
+enum _StepState { done, current, open, locked }
+
+/// Kadi ya hatua: inayofuata ni ya orange, iliyokamilika ina alama ya tiki, iliyofungwa ina kufuli.
 class _ActionCard extends StatelessWidget {
   const _ActionCard({
     required this.step,
     required this.icon,
-    required this.title,
     required this.subtitle,
+    required this.state,
     required this.onTap,
-    this.highlight = false,
   });
-  final int step;
+  final EventStep step;
   final IconData icon;
-  final String title;
   final String subtitle;
+  final _StepState state;
   final VoidCallback onTap;
-  final bool highlight;
 
   @override
   Widget build(BuildContext context) {
+    final highlight = state == _StepState.current;
+    final locked = state == _StepState.locked;
     final fg = highlight ? Colors.white : MwalikoColors.ink;
-    return SoftCard(
-      onTap: onTap,
-      color: highlight ? MwalikoColors.primary : null,
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    final Widget marker = switch (state) {
+      _StepState.done => const Icon(Icons.check_circle, color: MwalikoColors.success, size: 24),
+      _StepState.locked => Icon(Icons.lock_outline, color: MwalikoColors.muted.withValues(alpha: 0.8), size: 22),
+      _ => Text(
+        '0${step.number}',
+        style: TextStyle(
+          fontFamily: MwalikoFonts.display,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: highlight ? Colors.white.withValues(alpha: 0.75) : MwalikoColors.accentInk.withValues(alpha: 0.45),
+        ),
+      ),
+    };
+    return Semantics(
+      label: locked ? '${step.title}, imefungwa' : null,
+      child: Opacity(
+        opacity: locked ? 0.55 : 1,
+        child: SoftCard(
+          onTap: onTap,
+          color: highlight ? MwalikoColors.primary : null,
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              IconBadge(icon, color: highlight ? Colors.white : MwalikoColors.primary, size: 40),
+              Row(
+                children: [
+                  IconBadge(
+                    icon,
+                    color: highlight
+                        ? Colors.white
+                        : locked
+                        ? MwalikoColors.muted
+                        : MwalikoColors.primary,
+                    size: 40,
+                  ),
+                  const Spacer(),
+                  marker,
+                ],
+              ),
               const Spacer(),
               Text(
-                '0$step',
-                style: TextStyle(
-                  fontFamily: MwalikoFonts.display,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: highlight
-                      ? Colors.white.withValues(alpha: 0.6)
-                      : MwalikoColors.accentInk.withValues(alpha: 0.45),
-                ),
+                '${step.number}. ${step.title}',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: fg),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                locked ? 'Baada ya hatua ya ${step.number - 1}' : subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 12, color: highlight ? Colors.white70 : MwalikoColors.muted),
               ),
             ],
           ),
-          const Spacer(),
-          Text(
-            title,
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: fg),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            subtitle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 12, color: highlight ? Colors.white70 : MwalikoColors.muted),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -78,9 +78,11 @@ class EventStats {
     this.maybe = 0,
     this.pending = 0,
     this.checkedIn = 0,
+    this.invited = 0,
   });
 
-  final int guests, seats, attending, declined, maybe, pending, checkedIn;
+  /// [invited]: waalikwa waliokwisha kutumiwa mwaliko (wametozwa salio).
+  final int guests, seats, attending, declined, maybe, pending, checkedIn, invited;
 
   factory EventStats.fromJson(Map<String, dynamic>? j) {
     if (j == null) return const EventStats();
@@ -93,6 +95,7 @@ class EventStats {
       maybe: n('maybe'),
       pending: n('pending'),
       checkedIn: n('checked_in'),
+      invited: n('invited'),
     );
   }
 }

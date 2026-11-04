@@ -5,12 +5,16 @@ import '../../core/config.dart';
 import '../../core/money.dart';
 import '../../core/theme.dart';
 import '../../data/billing_repository.dart';
+import '../../data/events_repository.dart';
 import '../../data/guests_repository.dart';
 import '../../data/invitations_repository.dart';
 import '../../models/billing.dart';
+import '../../models/event.dart';
 import '../../models/guest.dart';
 import '../../widgets/async_view.dart';
 import '../../widgets/ui.dart';
+import '../cards/card_exporter.dart';
+import 'message_preview.dart';
 
 enum _Audience {
   notSent('Bado hawajatumiwa', Icons.mark_email_unread_outlined),
@@ -23,7 +27,8 @@ enum _Audience {
 }
 
 class _SendData {
-  const _SendData(this.guests, this.deliveries, this.credits, this.pricing);
+  const _SendData(this.event, this.guests, this.deliveries, this.credits, this.pricing);
+  final EventModel event;
   final List<Guest> guests;
   final List<Delivery> deliveries;
   final int credits;
@@ -48,15 +53,17 @@ class _SendScreenState extends State<SendScreen> {
   _Audience _audience = _Audience.notSent;
   bool _sending = false;
   (int, int)? _progress;
+  String _progressLabel = 'Inatuma';
 
   Future<_SendData> _load() async {
     final r = await Future.wait([
+      const EventsRepository().get(widget.eventId),
       _guestsRepo.list(widget.eventId),
       _inv.deliveries(widget.eventId),
       _billing.balance(),
       _billing.pricing(),
     ]);
-    return _SendData(r[0] as List<Guest>, r[1] as List<Delivery>, r[2] as int, r[3] as Pricing);
+    return _SendData(r[0] as EventModel, r[1] as List<Guest>, r[2] as List<Delivery>, r[3] as int, r[4] as Pricing);
   }
 
   void _reload() => setState(() => _future = _load());
@@ -118,7 +125,8 @@ class _SendScreenState extends State<SendScreen> {
   Future<void> _send(_SendData d, List<Guest> targets, int cost) async {
     if (cost > d.credits) return _needCredits(cost, d.credits, d.pricing);
 
-    final withoutCard = targets.where((g) => g.cardPath == null).length;
+    // Kadi binafsi ambazo bado hazijatengenezwa zinatengenezwa hapa kabla ya kutuma, ili mteja asisahau.
+    final withoutCard = targets.where((g) => g.cardPath == null).toList();
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
@@ -126,7 +134,7 @@ class _SendScreenState extends State<SendScreen> {
         content: Text(
           'Waalikwa ${targets.length} kupitia ${_channels.map((c) => c.label).join(', ')}.\n'
           'Salio litakatwa mialiko $cost (${formatTzs(d.pricing.priceFor(cost))}).'
-          '${withoutCard > 0 ? '\n\nWaalikwa $withoutCard hawana kadi binafsi bado; zitengeneze kwenye Studio ya kadi ili picha itumwe.' : ''}',
+          '${withoutCard.isNotEmpty ? '\n\nKadi binafsi ${withoutCard.length} zitatengenezwa kwanza (jina na QR ya kila mwalikwa).' : ''}',
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Hapana')),
@@ -142,9 +150,21 @@ class _SendScreenState extends State<SendScreen> {
 
     setState(() {
       _sending = true;
-      _progress = (0, targets.length);
+      _progressLabel = 'Inatengeneza kadi';
+      _progress = (0, withoutCard.length);
     });
     try {
+      if (withoutCard.isNotEmpty) {
+        await CardExporter().exportAll(
+          event: d.event,
+          guests: withoutCard,
+          onProgress: (done, total) => setState(() => _progress = (done, total)),
+        );
+      }
+      setState(() {
+        _progressLabel = 'Inatuma';
+        _progress = (0, targets.length);
+      });
       final summary = await _inv.send(
         eventId: widget.eventId,
         guestIds: [for (final g in targets) g.id!],
@@ -250,6 +270,9 @@ class _SendScreenState extends State<SendScreen> {
                 ),
               ),
               const SizedBox(height: 22),
+              const SectionHeader('Mwalikwa ataona hivi'),
+              MessagePreview(event: d.event, guests: targets.isNotEmpty ? targets : d.guests, channels: _channels),
+              const SizedBox(height: 22),
               _CostCard(
                 targets: targets.length,
                 cost: cost,
@@ -272,7 +295,7 @@ class _SendScreenState extends State<SendScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text('Inatuma… ${_progress!.$1} kati ya ${_progress!.$2}', textAlign: TextAlign.center),
+                Text('$_progressLabel… ${_progress!.$1} kati ya ${_progress!.$2}', textAlign: TextAlign.center),
                 const SizedBox(height: 12),
               ],
               FilledButton.icon(

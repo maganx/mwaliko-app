@@ -155,6 +155,7 @@ class DemoStore {
       'maybe': count('maybe'),
       'pending': count('pending'),
       'checked_in': g.where((x) => x['checked_in_at'] != null).length,
+      'invited': g.where((x) => x['charged_at'] != null).length,
     };
   }
 
