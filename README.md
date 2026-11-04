@@ -125,6 +125,7 @@ supabase secrets set \
   RSVP_BASE_URL=https://domain-yako.co.tz/rsvp/
 
 supabase functions deploy send-invitations
+supabase functions deploy delete-account
 supabase functions deploy whatsapp-webhook --no-verify-jwt
 ```
 
@@ -136,9 +137,9 @@ jiandikishe kwa field ya `messages` ili app ione "imefika" na "imesomwa".
 
 ### 4. Ukurasa wa RSVP
 
-Folda `rsvp_web/` ni ukurasa mmoja wa HTML. Nakili `config.example.js` kuwa `config.js`, weka URL na
-publishable key ya Supabase, kisha uweke kwenye hosting yoyote ya static (Netlify, Vercel, Cloudflare Pages,
-au hosting ya domain yako). Link yake ndiyo `RSVP_BASE_URL`.
+Folda `rsvp_web/` ni ukurasa mmoja wa HTML. `tool/build_web.sh` (na workflow ya Web) inauweka ndani ya web app
+kwenye `<web app>/rsvp/` pamoja na `config.js` yake, kwa hiyo `RSVP_BASE_URL` = `<web app>/rsvp/`.
+Ukitaka kuuweka mahali pengine, nakili `config.example.js` kuwa `config.js` na uweke URL na publishable key.
 
 ### 5. Kuendesha app
 
@@ -148,12 +149,44 @@ flutter pub get
 flutter run --dart-define-from-file=env.json
 ```
 
-Kujenga kwa ajili ya store:
+Kujenga kwa ajili ya store kwa mkono:
 
 ```bash
 flutter build appbundle --dart-define-from-file=env.json   # Google Play
 flutter build ipa --dart-define-from-file=env.json         # App Store (inahitaji Mac + Xcode)
 ```
+
+## Kuchapisha: App Store, Google Play na web
+
+Kitambulisho cha app ni `com.tembocloud.urinvente` (Android na iOS). Hakibadiliki baada ya kupakiwa mara ya
+kwanza. GitHub Actions inajenga kila kitu:
+
+| Workflow | Inafanya nini | Inahitaji |
+| --- | --- | --- |
+| `ci.yml` | analyze, tests, SQL ya salio, `deno check` ya functions | hakuna |
+| `android.yml` | AAB (Play) na APK (kujaribu), kama artifact; tag `v*` au kwa mkono: kupakia Play | Secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`; kupakia: `PLAY_SERVICE_ACCOUNT_JSON` |
+| `ios.yml` | kujenga iOS; secrets zikiwepo: archive na kupakia TestFlight | Secrets `APPLE_TEAM_ID`, `APPSTORE_API_KEY_ID`, `APPSTORE_API_ISSUER_ID`, `APPSTORE_API_PRIVATE_KEY` (+ si lazima `IOS_DIST_CERT_P12_BASE64`, `IOS_DIST_CERT_PASSWORD`) |
+| `web.yml` | web app + sera ya faragha + masharti + kufuta akaunti + RSVP kwenye GitHub Pages | Settings > Pages > Source: GitHub Actions |
+
+Repo variables (Settings > Secrets and variables > Actions > Variables), zinatumika na workflows zote:
+`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` (bila hivi app inajengwa kama demo), `WEB_BASE_URL`,
+`WEB_BASE_HREF` (`/` ukitumia domain yako), `SUPPORT_EMAIL`, `SUPPORT_PHONE`.
+
+Upload key ya Android (mara moja; ihifadhi mahali salama):
+
+```bash
+keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+base64 -w0 upload-keystore.jks   # weka matokeo kwenye secret ANDROID_KEYSTORE_BASE64
+```
+
+Masharti ya stores yaliyoshughulikiwa kwenye app:
+
+- **Kufuta akaunti** (Apple 5.1.1(v), Google Play): Akaunti > Futa akaunti, kupitia edge function `delete-account`;
+  pia ukurasa wa web `delete-account.html`.
+- **Sera ya faragha na masharti**: `web/privacy.html`, `web/terms.html`, na links ndani ya app.
+- **Malipo kwenye iPhone**: `AppConfig.canBuyCredits` inazima kununua salio kwenye app ya iOS (Apple 3.1.3(f));
+  Android na web zinabaki na malipo. Lazimisha kwa `--dart-define=IN_APP_PURCHASES=true|false`.
+- **Picha za stores** bila ukanda wa demo: `--dart-define=DEMO=true --dart-define=DEMO_BANNER=false`.
 
 ## Toleo la majaribio (demo)
 
