@@ -12,6 +12,10 @@ class AppConfig {
   /// Link ya ukurasa wa RSVP (folda rsvp_web/), mf. https://mwaliko.co.tz/rsvp
   static const rsvpBaseUrl = String.fromEnvironment('RSVP_BASE_URL');
 
+  /// Link ya RSVP ya mwalikwa (ukurasa wa kadi yake). Bila RSVP_BASE_URL: `{webBaseUrl}/rsvp/`.
+  static String rsvpLink(String? token) =>
+      '${rsvpBaseUrl.isNotEmpty ? rsvpBaseUrl : '$webBaseUrl/rsvp/'}?t=${token ?? ''}';
+
   /// Toleo la majaribio lenye data ya mfano, bila Supabase:
   ///   flutter run --dart-define=DEMO=true
   static const demo = bool.fromEnvironment('DEMO');

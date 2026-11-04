@@ -98,6 +98,8 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
   Future<bool> _save() async {
     setState(() => _saving = true);
     try {
+      // Kuhifadhi ndiko kunakamilisha hatua ya 1 (hatua ya 2, waalikwa, inafunguka).
+      _config = _config.copyWith(chosen: true);
       await _events.saveCardConfig(widget.eventId, _config);
       _event = _event!.copyWith(cardConfig: _config);
       return true;
@@ -204,7 +206,9 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
                   onPressed: _saving
                       ? null
                       : () async {
-                          if (await _save() && context.mounted) showSnack(context, 'Design imehifadhiwa');
+                          if (await _save() && context.mounted) {
+                            showSnack(context, 'Design imehifadhiwa. Hatua inayofuata: waalikwa.');
+                          }
                         },
                   child: const Text('Hifadhi'),
                 ),

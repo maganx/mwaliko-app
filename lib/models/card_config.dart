@@ -18,9 +18,13 @@ class CardConfig {
     this.showQr = true,
     this.qrPosition = const Offset(0.85, 0.88),
     this.qrSize = 0.16,
+    this.chosen = false,
   });
 
   final CardMode mode;
+
+  /// Mteja amechagua na kuhifadhi design (hatua ya 1 ya mwaliko imekamilika).
+  final bool chosen;
 
   // Template
   final String paletteId;
@@ -59,6 +63,7 @@ class CardConfig {
     bool? showQr,
     Offset? qrPosition,
     double? qrSize,
+    bool? chosen,
   }) => CardConfig(
     mode: mode ?? this.mode,
     paletteId: paletteId ?? this.paletteId,
@@ -74,6 +79,7 @@ class CardConfig {
     showQr: showQr ?? this.showQr,
     qrPosition: qrPosition ?? this.qrPosition,
     qrSize: qrSize ?? this.qrSize,
+    chosen: chosen ?? this.chosen,
   );
 
   factory CardConfig.fromJson(Map<String, dynamic>? j) {
@@ -96,6 +102,8 @@ class CardConfig {
       showQr: j['show_qr'] as bool? ?? fb.showQr,
       qrPosition: o(j['qr_pos'], fb.qrPosition),
       qrSize: d(j['qr_size'], fb.qrSize),
+      // Matukio ya zamani hayana "chosen": design yao ilishachaguliwa.
+      chosen: j['chosen'] as bool? ?? true,
     );
   }
 
@@ -114,6 +122,7 @@ class CardConfig {
     'show_qr': showQr,
     'qr_pos': [qrPosition.dx, qrPosition.dy],
     'qr_size': qrSize,
+    'chosen': chosen,
   };
 }
 

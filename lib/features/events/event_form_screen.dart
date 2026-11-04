@@ -107,7 +107,11 @@ class _EventFormScreenState extends State<EventFormScreen> {
         if (mounted) context.pop();
       } else {
         final created = await _repo.create(event);
-        if (mounted) context.pushReplacement('/events/${created.id}');
+        if (!mounted) return;
+        // pop kwanza ili skrini iliyofungua fomu (Nyumbani/Matukio) ijisasishe, kisha fungua tukio jipya.
+        final router = GoRouter.of(context);
+        router.pop();
+        router.push('/events/${created.id}');
       }
     } catch (e) {
       if (mounted) showSnack(context, friendlyError(e));

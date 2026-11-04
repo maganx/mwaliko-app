@@ -18,6 +18,8 @@ import 'features/home/app_shell.dart';
 import 'features/home/home_screen.dart';
 import 'features/send/send_screen.dart';
 import 'features/wallet/wallet_screen.dart';
+import 'models/event_progress.dart';
+import 'widgets/step_gate.dart';
 import 'widgets/ui.dart';
 
 class MwalikoApp extends StatefulWidget {
@@ -118,7 +120,13 @@ final _routes = <RouteBase>[
       ),
       GoRoute(
         path: 'guests',
-        builder: (_, s) => MaxWidth(child: GuestsScreen(eventId: s.pathParameters['id']!)),
+        builder: (_, s) => MaxWidth(
+          child: StepGate(
+            eventId: s.pathParameters['id']!,
+            step: EventStep.guests,
+            child: GuestsScreen(eventId: s.pathParameters['id']!),
+          ),
+        ),
       ),
       GoRoute(
         path: 'card',
@@ -126,11 +134,23 @@ final _routes = <RouteBase>[
       ),
       GoRoute(
         path: 'send',
-        builder: (_, s) => MaxWidth(child: SendScreen(eventId: s.pathParameters['id']!)),
+        builder: (_, s) => MaxWidth(
+          child: StepGate(
+            eventId: s.pathParameters['id']!,
+            step: EventStep.send,
+            child: SendScreen(eventId: s.pathParameters['id']!),
+          ),
+        ),
       ),
       GoRoute(
         path: 'checkin',
-        builder: (_, s) => MaxWidth(child: CheckinScreen(eventId: s.pathParameters['id']!)),
+        builder: (_, s) => MaxWidth(
+          child: StepGate(
+            eventId: s.pathParameters['id']!,
+            step: EventStep.checkin,
+            child: CheckinScreen(eventId: s.pathParameters['id']!),
+          ),
+        ),
       ),
     ],
   ),
