@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/config.dart';
 import '../../core/money.dart';
 import '../../core/theme.dart';
 import '../../data/billing_repository.dart';
@@ -75,6 +76,18 @@ class _SendScreenState extends State<SendScreen> {
   }
 
   Future<void> _needCredits(int needed, int balance, Pricing pricing) async {
+    if (!AppConfig.canBuyCredits) {
+      await showDialog<void>(
+        context: context,
+        builder: (c) => AlertDialog(
+          icon: const IconBadge(Icons.account_balance_wallet_outlined, color: MwalikoColors.warning, size: 52),
+          title: const Text('Salio halitoshi'),
+          content: Text('Unahitaji mialiko $needed lakini una $balance. Chagua waalikwa wachache zaidi.'),
+          actions: [TextButton(onPressed: () => Navigator.pop(c), child: const Text('Sawa'))],
+        ),
+      );
+      return;
+    }
     final missing = needed - balance;
     final buy = missing < pricing.minPurchase ? pricing.minPurchase : missing;
     final go = await showDialog<bool>(
@@ -270,7 +283,9 @@ class _SendScreenState extends State<SendScreen> {
                       ? 'Hakuna wa kutumiwa'
                       : enough
                       ? 'Tuma kwa waalikwa ${targets.length}'
-                      : 'Ongeza salio ili kutuma',
+                      : AppConfig.canBuyCredits
+                      ? 'Ongeza salio ili kutuma'
+                      : 'Salio halitoshi',
                 ),
               ),
               const SizedBox(height: 28),
@@ -431,10 +446,11 @@ class _CostCard extends StatelessWidget {
               const IconBadge(Icons.receipt_long_outlined, size: 38),
               const SizedBox(width: 12),
               Expanded(child: Text('Gharama ya utumaji', style: t.titleMedium)),
-              Text(
-                '${formatTzs(pricing.pricePerGuest)}/mtu',
-                style: t.bodySmall?.copyWith(color: MwalikoColors.primary, fontWeight: FontWeight.w600),
-              ),
+              if (AppConfig.canBuyCredits)
+                Text(
+                  '${formatTzs(pricing.pricePerGuest)}/mtu',
+                  style: t.bodySmall?.copyWith(color: MwalikoColors.primary, fontWeight: FontWeight.w600),
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -442,7 +458,7 @@ class _CostCard extends StatelessWidget {
           if (free > 0) row('Walishatozwa au hawafikiki (bure)', '$free'),
           row('Watakaotozwa', '$cost'),
           const Divider(height: 20),
-          row('Jumla', formatTzs(pricing.priceFor(cost)), bold: true),
+          if (AppConfig.canBuyCredits) row('Jumla', formatTzs(pricing.priceFor(cost)), bold: true),
           row('Salio lako', 'mialiko $credits'),
           row(
             enough ? 'Salio litakalobaki' : 'Unakosa',
@@ -450,7 +466,7 @@ class _CostCard extends StatelessWidget {
             color: enough ? MwalikoColors.success : MwalikoColors.danger,
             bold: true,
           ),
-          if (!enough) ...[
+          if (!enough && AppConfig.canBuyCredits) ...[
             const SizedBox(height: 10),
             OutlinedButton.icon(onPressed: onTopUp, icon: const Icon(Icons.add), label: const Text('Ongeza salio')),
           ],

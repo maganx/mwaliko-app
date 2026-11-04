@@ -3,11 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Mwaliko inatumia kamera kuskani QR code za kadi za waalikwa mlangoni.</string>
+	<string>U'r Invente inatumia kamera kuskani QR code za kadi za waalikwa mlangoni (check-in).</string>
 	<key>NSContactsUsageDescription</key>
-	<string>Mwaliko inasoma contacts ili uweze kuchagua waalikwa haraka.</string>
+	<string>U'r Invente inasoma contacts unazochagua ili uongeze waalikwa haraka. Hazitumwi popote bila wewe kuzichagua.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Mwaliko inahitaji picha zako ili upakie design ya kadi yako.</string>
+	<string>U'r Invente inafungua picha unayochagua ili upakie design ya kadi yako.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -21,7 +23,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>mwaliko</string>
+	<string>U'r Invente</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -62,8 +64,6 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>

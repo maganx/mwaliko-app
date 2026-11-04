@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/config.dart';
+import '../../core/links.dart';
 import '../../core/money.dart';
 import '../../core/phone.dart';
 import '../../core/theme.dart';
@@ -66,6 +67,20 @@ class _AccountScreenState extends State<AccountScreen> {
     );
     if (ok == true) await AuthRepository.instance.signOut();
   }
+
+  Future<void> _deleteAccount() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final deleted = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const _DeleteAccountDialog(),
+    );
+    if (deleted == true) {
+      messenger.showSnackBar(const SnackBar(content: Text('Akaunti yako na data yake vimefutwa.')));
+    }
+  }
+
+  String get _support => [AppConfig.supportPhone, AppConfig.supportEmail].where((s) => s.isNotEmpty).join(' · ');
 
   @override
   Widget build(BuildContext context) {
@@ -137,49 +152,57 @@ class _AccountScreenState extends State<AccountScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SectionHeader('Bei'),
-                    SoftCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                formatTzs(price.pricePerGuest),
-                                style: t.headlineMedium?.copyWith(color: MwalikoColors.primary),
-                              ),
-                              const SizedBox(width: 6),
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 4),
-                                child: Text('kwa mwalikwa', style: t.bodyMedium?.copyWith(color: MwalikoColors.muted)),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          _PriceLine(
-                            Icons.check_circle_outline,
-                            'Tukio la watu 200 = ${formatTzs(price.priceFor(200))}',
-                          ),
-                          _PriceLine(
-                            Icons.check_circle_outline,
-                            'Kima cha chini: mialiko ${price.minPurchase} '
-                            '(${formatTzs(price.priceFor(price.minPurchase))})',
-                          ),
-                          const _PriceLine(Icons.check_circle_outline, 'SMS, WhatsApp na email bila gharama ya ziada'),
-                          const _PriceLine(Icons.check_circle_outline, 'Kumtumia mwalikwa tena ni bure'),
-                          const _PriceLine(Icons.check_circle_outline, 'Salio halina muda wa kuisha'),
-                          const SizedBox(height: 12),
-                          OutlinedButton.icon(
-                            onPressed: () => context.go('/wallet'),
-                            icon: const Icon(Icons.account_balance_wallet_outlined),
-                            label: const Text('Nunua mialiko'),
-                          ),
-                        ],
+                    if (AppConfig.canBuyCredits) ...[
+                      const SectionHeader('Bei'),
+                      SoftCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  formatTzs(price.pricePerGuest),
+                                  style: t.headlineMedium?.copyWith(color: MwalikoColors.primary),
+                                ),
+                                const SizedBox(width: 6),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 4),
+                                  child: Text(
+                                    'kwa mwalikwa',
+                                    style: t.bodyMedium?.copyWith(color: MwalikoColors.muted),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            _PriceLine(
+                              Icons.check_circle_outline,
+                              'Tukio la watu 200 = ${formatTzs(price.priceFor(200))}',
+                            ),
+                            _PriceLine(
+                              Icons.check_circle_outline,
+                              'Kima cha chini: mialiko ${price.minPurchase} '
+                              '(${formatTzs(price.priceFor(price.minPurchase))})',
+                            ),
+                            const _PriceLine(
+                              Icons.check_circle_outline,
+                              'SMS, WhatsApp na email bila gharama ya ziada',
+                            ),
+                            const _PriceLine(Icons.check_circle_outline, 'Kumtumia mwalikwa tena ni bure'),
+                            const _PriceLine(Icons.check_circle_outline, 'Salio halina muda wa kuisha'),
+                            const SizedBox(height: 12),
+                            OutlinedButton.icon(
+                              onPressed: () => context.go('/wallet'),
+                              icon: const Icon(Icons.account_balance_wallet_outlined),
+                              label: const Text('Nunua mialiko'),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                     if (p.isAdmin) ...[
-                      const SizedBox(height: 22),
+                      if (AppConfig.canBuyCredits) const SizedBox(height: 22),
                       const SectionHeader('Usimamizi'),
                       SoftCard(
                         padding: const EdgeInsets.symmetric(vertical: 4),
@@ -202,7 +225,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         ),
                       ),
                     ],
-                    const SizedBox(height: 22),
+                    if (AppConfig.canBuyCredits || p.isAdmin) const SizedBox(height: 22),
                     const SectionHeader('Akaunti'),
                     SoftCard(
                       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -222,16 +245,51 @@ class _AccountScreenState extends State<AccountScreen> {
                             onTap: () => _edit(p),
                           ),
                           const Divider(indent: 16, endIndent: 16),
-                          ListTile(
-                            leading: const IconBadge(Icons.support_agent, size: 40),
-                            title: Text('Msaada', style: t.titleSmall),
-                            subtitle: Text('WhatsApp/simu: +255 700 000 000', style: t.bodySmall),
-                          ),
-                          const Divider(indent: 16, endIndent: 16),
+                          if (_support.isNotEmpty) ...[
+                            ListTile(
+                              leading: const IconBadge(Icons.support_agent, size: 40),
+                              title: Text('Msaada', style: t.titleSmall),
+                              subtitle: Text(_support, style: t.bodySmall),
+                            ),
+                            const Divider(indent: 16, endIndent: 16),
+                          ],
                           ListTile(
                             leading: const IconBadge(Icons.logout_rounded, color: MwalikoColors.danger, size: 40),
                             title: Text('Toka', style: t.titleSmall?.copyWith(color: MwalikoColors.danger)),
                             onTap: _signOut,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 22),
+                    const SectionHeader('Faragha'),
+                    SoftCard(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Column(
+                        children: [
+                          ListTile(
+                            leading: const IconBadge(Icons.privacy_tip_outlined, size: 40),
+                            title: Text('Sera ya faragha', style: t.titleSmall),
+                            trailing: const Icon(Icons.open_in_new, size: 20),
+                            onTap: () => openLink(context, AppConfig.privacyUrl),
+                          ),
+                          const Divider(indent: 16, endIndent: 16),
+                          ListTile(
+                            leading: const IconBadge(Icons.description_outlined, size: 40),
+                            title: Text('Masharti ya matumizi', style: t.titleSmall),
+                            trailing: const Icon(Icons.open_in_new, size: 20),
+                            onTap: () => openLink(context, AppConfig.termsUrl),
+                          ),
+                          const Divider(indent: 16, endIndent: 16),
+                          ListTile(
+                            leading: const IconBadge(
+                              Icons.delete_forever_outlined,
+                              color: MwalikoColors.danger,
+                              size: 40,
+                            ),
+                            title: Text('Futa akaunti', style: t.titleSmall?.copyWith(color: MwalikoColors.danger)),
+                            subtitle: Text('Inafuta akaunti na data yako yote', style: t.bodySmall),
+                            onTap: _deleteAccount,
                           ),
                         ],
                       ),
@@ -249,6 +307,94 @@ class _AccountScreenState extends State<AccountScreen> {
           );
         },
       ),
+    );
+  }
+}
+
+/// Uthibitisho wa kufuta akaunti: mteja anaandika FUTA, kisha akaunti inafutwa hapa hapa.
+class _DeleteAccountDialog extends StatefulWidget {
+  const _DeleteAccountDialog();
+
+  @override
+  State<_DeleteAccountDialog> createState() => _DeleteAccountDialogState();
+}
+
+class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
+  final _confirm = TextEditingController();
+  bool _busy = false;
+  String? _error;
+
+  bool get _ready => _confirm.text.trim().toUpperCase() == 'FUTA';
+
+  @override
+  void dispose() {
+    _confirm.dispose();
+    super.dispose();
+  }
+
+  Future<void> _delete() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await AuthRepository.instance.deleteAccount();
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _error = friendlyError(e);
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      icon: const IconBadge(Icons.delete_forever_outlined, color: MwalikoColors.danger, size: 52),
+      title: const Text('Futa akaunti?'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Akaunti yako itafutwa kabisa pamoja na matukio, waalikwa, kadi, salio lililobaki na historia ya malipo. '
+            'Hili haliwezi kurudishwa.',
+          ),
+          const SizedBox(height: 14),
+          TextField(
+            controller: _confirm,
+            enabled: !_busy,
+            textCapitalization: TextCapitalization.characters,
+            decoration: const InputDecoration(labelText: 'Andika FUTA kuthibitisha'),
+            onChanged: (_) => setState(() {}),
+          ),
+          if (_error != null) ...[
+            const SizedBox(height: 10),
+            Text(_error!, style: const TextStyle(color: MwalikoColors.danger)),
+          ],
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: _busy ? null : () => Navigator.pop(context, false), child: const Text('Hapana')),
+        FilledButton(
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(0, 44),
+            backgroundColor: MwalikoColors.danger,
+            foregroundColor: Colors.white,
+          ),
+          onPressed: _ready && !_busy ? _delete : null,
+          child: _busy
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white),
+                )
+              : const Text('Futa kabisa'),
+        ),
+      ],
     );
   }
 }

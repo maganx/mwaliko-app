@@ -3,34 +3,45 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mwaliko · Thibitisha kuhudhuria</title>
+  <title>U'r Invente · Thibitisha kuhudhuria</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
   <style>
-    :root { --maroon:#7a1f3d; --gold:#d4af37; --cream:#fff8f0; --ink:#2a1a20; }
+    /* Brand ya U'r Invente: asili ya aqua, kadi za glass, vitufe vya orange */
+    :root { --orange:#FF7200; --orange-deep:#E06400; --orange-text:#C2410C; --ink:#08343A; --muted:#2F5B60;
+            --glass:rgba(255,255,255,.72); --border:rgba(255,255,255,.85); }
     * { box-sizing: border-box; }
-    body { margin:0; font-family:Poppins, system-ui, sans-serif; background:var(--cream); color:var(--ink); }
+    html { background:#5CD6CF; }
+    body { margin:0; min-height:100vh; font-family:Inter, system-ui, sans-serif; color:var(--ink);
+           background:linear-gradient(135deg,#A8F0E0 0%,#5CD6CF 55%,#3BB8D0 100%) fixed; }
     main { max-width:520px; margin:0 auto; padding:20px 16px 48px; }
-    .brand { font-family:"Great Vibes", cursive; color:var(--maroon); font-size:40px; text-align:center; margin:4px 0 12px; }
-    .card-img { width:100%; border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,.15); display:block; }
-    h1 { font-family:"Playfair Display", serif; font-size:26px; margin:20px 0 4px; text-align:center; }
-    .muted { color:#6b5a60; text-align:center; margin:2px 0; }
-    .panel { background:#fff; border-radius:18px; padding:18px; margin-top:18px; border:1px solid #f0e4e4; }
+    .brand { font-family:"Plus Jakarta Sans", system-ui, sans-serif; font-weight:800; font-size:26px; text-align:center; margin:4px 0 2px; }
+    .brand span { color:var(--orange); }
+    .by { text-align:center; font-size:10px; letter-spacing:1.6px; color:var(--muted); margin-bottom:14px; }
+    .card-img { width:100%; border-radius:14px; box-shadow:0 10px 30px rgba(8,52,58,.22); display:block; }
+    h1 { font-family:"Plus Jakarta Sans", system-ui, sans-serif; font-weight:800; font-size:24px; margin:20px 0 4px; text-align:center; }
+    .muted { color:var(--muted); text-align:center; margin:2px 0; }
+    .panel { background:var(--glass); border:1.5px solid var(--border); border-radius:22px; padding:18px; margin-top:18px;
+             box-shadow:0 10px 30px rgba(8,52,58,.10); -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px); }
     .choices { display:grid; grid-template-columns:1fr; gap:10px; margin-top:12px; }
-    button { font:inherit; border-radius:26px; padding:14px; border:2px solid var(--maroon); background:#fff; color:var(--maroon); font-weight:600; cursor:pointer; }
-    button.active, button.primary { background:var(--maroon); color:#fff; }
+    button { font:inherit; border-radius:16px; padding:14px; border:1.5px solid var(--border); background:rgba(255,255,255,.6);
+             color:var(--ink); font-weight:600; cursor:pointer; }
+    button.active, button.primary { background:var(--orange); border-color:var(--orange); color:#fff; box-shadow:0 10px 22px rgba(255,114,0,.35); }
+    button.primary:active { background:var(--orange-deep); }
     button:disabled { opacity:.6; cursor:default; }
     label { display:block; margin-top:14px; font-size:14px; }
-    select, textarea { width:100%; font:inherit; padding:10px; border-radius:12px; border:1px solid #e3d4d4; margin-top:6px; }
-    .ok { background:#eaf6ec; color:#1e6b33; border-radius:12px; padding:12px; text-align:center; margin-top:14px; }
-    .err { background:#fdecec; color:#9b1c1c; border-radius:12px; padding:12px; text-align:center; margin-top:14px; }
-    a { color:var(--maroon); }
+    select, textarea { width:100%; font:inherit; padding:10px; border-radius:14px; border:1.5px solid var(--border);
+                       background:rgba(255,255,255,.7); margin-top:6px; color:var(--ink); }
+    .ok { background:#D7F7F1; color:#00695C; border-radius:14px; padding:12px; text-align:center; margin-top:14px; }
+    .err { background:#FDECEC; color:#B91C1C; border-radius:14px; padding:12px; text-align:center; margin-top:14px; }
+    a { color:var(--orange-text); font-weight:600; }
     [hidden] { display:none !important; }
   </style>
 </head>
 <body>
 <main>
-  <div class="brand">Mwaliko</div>
+  <div class="brand">U'r <span>Invente</span></div>
+  <div class="by">BY TEMBO CLOUD</div>
   <div id="loading" class="muted">Inapakia mwaliko wako…</div>
   <div id="error" class="err" hidden></div>
 

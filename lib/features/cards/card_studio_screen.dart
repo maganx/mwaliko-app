@@ -227,8 +227,9 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
 
   Widget _grid(List<(String, CardConfig)> items) => GridView.builder(
     padding: const EdgeInsets.all(12),
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2,
+    // Simu: kadi 2 kwa mstari; skrini pana: zaidi.
+    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+      maxCrossAxisExtent: 240,
       childAspectRatio: 0.68,
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,

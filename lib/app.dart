@@ -18,6 +18,7 @@ import 'features/home/app_shell.dart';
 import 'features/home/home_screen.dart';
 import 'features/send/send_screen.dart';
 import 'features/wallet/wallet_screen.dart';
+import 'widgets/ui.dart';
 
 class MwalikoApp extends StatefulWidget {
   const MwalikoApp({super.key});
@@ -44,7 +45,8 @@ class _MwalikoAppState extends State<MwalikoApp> {
       theme: buildTheme(),
       routerConfig: _router,
       // Asili ya aqua iko nyuma ya kila skrini (scaffold ni wazi).
-      builder: (context, child) => BrandBackground(child: AppConfig.demo ? _DemoFrame(child: child!) : child!),
+      builder: (context, child) =>
+          BrandBackground(child: AppConfig.demo && AppConfig.demoBanner ? _DemoFrame(child: child!) : child!),
       locale: const Locale('sw'),
       supportedLocales: const [Locale('sw'), Locale('en')],
       localizationsDelegates: const [
@@ -65,6 +67,8 @@ GoRouter _buildRouter() {
       final atLogin = state.matchedLocation == '/login';
       if (!auth.isSignedIn) return atLogin ? null : '/login';
       if (atLogin) return '/';
+      // App ya iPhone haina manunuzi ndani yake (angalia AppConfig.canBuyCredits).
+      if (state.matchedLocation == '/topup' && !AppConfig.canBuyCredits) return '/wallet';
       return null;
     },
     routes: _routes,
@@ -91,36 +95,42 @@ final _routes = <RouteBase>[
       ),
     ],
   ),
-  // Skrini kamili (juu ya tabo)
+  // Skrini kamili (juu ya tabo); kwenye kompyuta zinakaa katikati
   GoRoute(
     path: '/topup',
-    builder: (_, s) => WalletScreen(need: int.tryParse(s.uri.queryParameters['need'] ?? '')),
+    builder: (_, s) => MaxWidth(child: WalletScreen(need: int.tryParse(s.uri.queryParameters['need'] ?? ''))),
   ),
-  GoRoute(path: '/admin/payments', builder: (_, _) => const AdminPaymentsScreen()),
-  GoRoute(path: '/events/new', builder: (_, _) => const EventFormScreen()),
+  GoRoute(
+    path: '/admin/payments',
+    builder: (_, _) => const MaxWidth(child: AdminPaymentsScreen()),
+  ),
+  GoRoute(
+    path: '/events/new',
+    builder: (_, _) => const MaxWidth(child: EventFormScreen()),
+  ),
   GoRoute(
     path: '/events/:id',
-    builder: (_, s) => EventDetailScreen(eventId: s.pathParameters['id']!),
+    builder: (_, s) => MaxWidth(child: EventDetailScreen(eventId: s.pathParameters['id']!)),
     routes: [
       GoRoute(
         path: 'edit',
-        builder: (_, s) => EventFormScreen(eventId: s.pathParameters['id']),
+        builder: (_, s) => MaxWidth(child: EventFormScreen(eventId: s.pathParameters['id'])),
       ),
       GoRoute(
         path: 'guests',
-        builder: (_, s) => GuestsScreen(eventId: s.pathParameters['id']!),
+        builder: (_, s) => MaxWidth(child: GuestsScreen(eventId: s.pathParameters['id']!)),
       ),
       GoRoute(
         path: 'card',
-        builder: (_, s) => CardStudioScreen(eventId: s.pathParameters['id']!),
+        builder: (_, s) => MaxWidth(child: CardStudioScreen(eventId: s.pathParameters['id']!)),
       ),
       GoRoute(
         path: 'send',
-        builder: (_, s) => SendScreen(eventId: s.pathParameters['id']!),
+        builder: (_, s) => MaxWidth(child: SendScreen(eventId: s.pathParameters['id']!)),
       ),
       GoRoute(
         path: 'checkin',
-        builder: (_, s) => CheckinScreen(eventId: s.pathParameters['id']!),
+        builder: (_, s) => MaxWidth(child: CheckinScreen(eventId: s.pathParameters['id']!)),
       ),
     ],
   ),

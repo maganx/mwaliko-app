@@ -69,6 +69,19 @@ class AuthRepository extends ChangeNotifier {
     await sb.auth.signOut();
   }
 
+  /// Inafuta akaunti na data yote ya mteja: matukio, waalikwa, kadi, salio na malipo
+  /// (edge function `delete-account`). Haiwezi kurudishwa.
+  Future<void> deleteAccount() async {
+    if (AppConfig.demo) {
+      await Future<void>.delayed(const Duration(milliseconds: 600));
+      _demo.reset();
+      notifyListeners();
+      return;
+    }
+    await sb.functions.invoke('delete-account', body: {'confirm': 'FUTA'});
+    await sb.auth.signOut(scope: SignOutScope.local);
+  }
+
   Future<Profile> profile() async {
     if (AppConfig.demo) return Profile.fromJson(_demo.signedInUser!, email: _demo.signedInUser!['email'] as String?);
     final user = sb.auth.currentUser!;

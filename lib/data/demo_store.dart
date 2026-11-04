@@ -37,6 +37,19 @@ class DemoStore {
     };
   }
 
+  /// Kufuta akaunti ya demo: data yote inarudi kama mwanzo na mteja anatolewa.
+  void reset() {
+    events.clear();
+    guests.clear();
+    deliveries.clear();
+    files.clear();
+    transactions.clear();
+    payments.clear();
+    credits = 24;
+    signedInUser = null;
+    _seed();
+  }
+
   Map<String, dynamic> _payment(
     String userId,
     int credits,
