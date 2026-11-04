@@ -15,7 +15,7 @@ import 'card_exporter.dart';
 import 'card_styles.dart';
 import 'invitation_card.dart';
 
-/// Studio ya kadi: chagua template, tengeneza design mpya, au pakia design yako.
+/// Studio ya kadi: chagua template, kadi yenye picha yako, design mpya, au pakia design yako nzima.
 class CardStudioScreen extends StatefulWidget {
   const CardStudioScreen({super.key, required this.eventId});
   final String eventId;
@@ -27,7 +27,7 @@ class CardStudioScreen extends StatefulWidget {
 class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerProviderStateMixin {
   final _events = const EventsRepository();
   final _cards = const CardsRepository();
-  late final _tabs = TabController(length: 3, vsync: this);
+  late final _tabs = TabController(length: 4, vsync: this);
 
   EventModel? _event;
   late CardConfig _config;
@@ -37,8 +37,14 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
   /// Picha ya design ya mteja kwa preview (bila kupakua tena).
   ImageProvider? _customPreview;
 
+  /// Picha ya mteja kwa template za picha (preview bila kupakua tena).
+  ImageProvider? _photoPreview;
+  List<CardConfig> _photoDesigns = const [];
+
   int _seed = DateTime.now().millisecondsSinceEpoch;
   late List<CardConfig> _generated;
+
+  static const _photoDesignCount = 8;
 
   @override
   void initState() {
@@ -60,10 +66,52 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
         _config = e.cardConfig;
         _generated = CardGenerator(_seed).generateMany(_config, 6, eventType: e.eventType);
         if (_config.isCustom) _customPreview = _cards.imageFor(_config.customImagePath!);
-        if (_config.isCustom) _tabs.index = 2;
+        if (_config.photoPath != null) {
+          _photoPreview = _cards.imageFor(_config.photoPath!);
+          _photoDesigns = _newPhotoDesigns();
+          // Design iliyohifadhiwa ionekane kwanza.
+          if (_config.hasPhoto && !_photoDesigns.any((c) => designKey(c) == designKey(_config))) {
+            _photoDesigns = [_config, ..._photoDesigns.take(_photoDesignCount - 1)];
+          }
+        }
+        if (_config.isCustom) _tabs.index = 3;
+        if (_config.hasPhoto) _tabs.index = 1;
       });
     } catch (e) {
       setState(() => _loadError = e);
+    }
+  }
+
+  List<CardConfig> _newPhotoDesigns() => CardGenerator(_seed)
+      .generateWithPhoto(_config.copyWith(mode: CardMode.template), _photoDesignCount, eventType: _event?.eventType);
+
+  void _regeneratePhotos() => setState(() {
+    _seed = Random().nextInt(1 << 31);
+    _photoDesigns = _newPhotoDesigns();
+  });
+
+  /// Mteja anaweka picha yake (mf. maharusi); designs zenye picha zinatengenezwa papo hapo.
+  Future<void> _pickPhoto() async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 1600, imageQuality: 88);
+    if (picked == null) return;
+    final bytes = await picked.readAsBytes();
+    if (!mounted) return;
+    setState(() => _saving = true);
+    try {
+      final ext = picked.name.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
+      final path = await _cards.uploadDesign(widget.eventId, bytes, ext, kind: 'photo');
+      setState(() {
+        _photoPreview = MemoryImage(Uint8List.fromList(bytes));
+        _config = _config.copyWith(photoPath: path);
+        _seed = Random().nextInt(1 << 31);
+        _photoDesigns = _newPhotoDesigns();
+        // Chagua design ya kwanza ili mteja aone picha yake kwenye kadi mara moja.
+        _config = _photoDesigns.first;
+      });
+    } catch (e) {
+      if (mounted) showSnack(context, friendlyError(e));
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -157,6 +205,7 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
           tabAlignment: TabAlignment.start,
           tabs: const [
             Tab(text: 'Template'),
+            Tab(text: 'Kadi ya picha'),
             Tab(text: 'Tengeneza mpya'),
             Tab(text: 'Design yangu'),
           ],
@@ -166,6 +215,7 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
         controller: _tabs,
         children: [
           _grid([for (final t in curatedTemplates) (t.name, t.apply(_config))]),
+          _photoTab(),
           Column(
             children: [
               Padding(
@@ -241,12 +291,7 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
     itemCount: items.length,
     itemBuilder: (_, i) {
       final (name, c) = items[i];
-      final selected =
-          !_config.isCustom &&
-          c.paletteId == _config.paletteId &&
-          c.ornamentId == _config.ornamentId &&
-          c.fontPairId == _config.fontPairId &&
-          c.layoutId == _config.layoutId;
+      final selected = !_config.isCustom && designKey(c) == designKey(_config);
       return GestureDetector(
         onTap: () => setState(() => _config = c.copyWith(mode: CardMode.template)),
         child: Column(
@@ -264,6 +309,7 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
                   child: InvitationCard(
                     event: _event!,
                     config: c.copyWith(mode: CardMode.template),
+                    photoProvider: _photoPreview,
                   ),
                 ),
               ),
@@ -275,6 +321,80 @@ class _CardStudioScreenState extends State<CardStudioScreen> with SingleTickerPr
       );
     },
   );
+
+  Widget _photoTab() {
+    final photo = _photoPreview;
+    if (photo == null || _config.photoPath == null) {
+      return Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.add_a_photo_outlined, size: 64, color: MwalikoColors.primary),
+              const SizedBox(height: 12),
+              const Text(
+                'Weka picha yako: maharusi, mwenye birthday, mhitimu au nembo ya kampuni.\n'
+                'Tutatengeneza designs tofauti zenye picha hiyo, jina la kila mwalikwa na QR yake.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: _saving ? null : _pickPhoto,
+                icon: const Icon(Icons.photo_library_outlined),
+                label: Text(_saving ? 'Inapakia…' : 'Chagua picha'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: _saving ? null : _pickPhoto,
+                child: CircleAvatar(radius: 24, backgroundImage: photo),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Picha yako', style: TextStyle(fontWeight: FontWeight.w700)),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 30),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      onPressed: _saving ? null : _pickPhoto,
+                      child: Text(_saving ? 'Inapakia…' : 'Badilisha picha'),
+                    ),
+                  ],
+                ),
+              ),
+              FilledButton.tonalIcon(
+                style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
+                onPressed: _regeneratePhotos,
+                icon: const Icon(Icons.auto_awesome),
+                label: const Text('Nyingine'),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: _grid([
+            for (final c in _photoDesigns) ('${photoLayoutNames[c.layoutId]} · ${paletteById(c.paletteId).name}', c),
+          ]),
+        ),
+      ],
+    );
+  }
 
   Widget _customTab(EventModel event) {
     if (!_config.isCustom) {

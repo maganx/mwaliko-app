@@ -5,6 +5,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../core/event_types.dart';
 import '../../core/swahili_time.dart';
+import '../../data/cards_repository.dart';
 import '../../models/card_config.dart';
 import '../../models/event.dart';
 import 'card_styles.dart';
@@ -22,6 +23,8 @@ class InvitationCard extends StatelessWidget {
     this.qrData,
     this.customImage,
     this.customImageProvider,
+    this.photo,
+    this.photoProvider,
   });
 
   final EventModel event;
@@ -39,6 +42,12 @@ class InvitationCard extends StatelessWidget {
 
   /// Au picha kama ImageProvider (kwa preview kwenye skrini).
   final ImageProvider? customImageProvider;
+
+  /// Picha ya mteja kwa template za picha ([CardConfig.hasPhoto]), iliyokwisha decode-iwa (PNG).
+  final ui.Image? photo;
+
+  /// Au kama ImageProvider. Zote zikiwa null, picha inasomwa kutoka storage.
+  final ImageProvider? photoProvider;
 
   static const templateSize = Size(540, 675);
 
@@ -110,6 +119,7 @@ class InvitationCard extends StatelessWidget {
   Widget _template(Size size) {
     final palette = paletteById(config.paletteId);
     final fonts = fontPairById(config.fontPairId);
+    if (config.hasPhoto) return _photoTemplate(size, palette, fonts);
     final layout = config.layoutId;
     final insets = _insetsFor(config.ornamentId, layout);
 
@@ -378,6 +388,306 @@ class InvitationCard extends StatelessWidget {
     );
   }
 
+  // -------------------------------------------------------------------------
+  // Template zenye picha ya mteja
+  // -------------------------------------------------------------------------
+  Widget _photoImage({Alignment alignment = const Alignment(0, -0.3)}) {
+    if (photo != null) return RawImage(image: photo, fit: BoxFit.cover, alignment: alignment);
+    return Image(
+      image: photoProvider ?? const CardsRepository().imageFor(config.photoPath!),
+      fit: BoxFit.cover,
+      alignment: alignment,
+      gaplessPlayback: true,
+      errorBuilder: (_, _, _) => const ColoredBox(
+        color: Color(0x33000000),
+        child: Center(child: Icon(Icons.person, size: 72, color: Colors.white70)),
+      ),
+    );
+  }
+
+  Widget _background(CardPalette p) => DecoratedBox(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: p.background),
+    ),
+  );
+
+  Widget _photoTemplate(Size size, CardPalette p, FontPair f) {
+    final ornament = CustomPaint(
+      painter: OrnamentPainter(ornamentId: config.ornamentId, palette: p),
+    );
+    final shadow = [BoxShadow(color: Colors.black.withValues(alpha: 0.22), blurRadius: 18, offset: const Offset(0, 8))];
+
+    switch (config.layoutId) {
+      case 'photo_full':
+        final light = _brightOf(p);
+        return Stack(
+          children: [
+            Positioned.fill(child: _photoImage(alignment: const Alignment(0, -0.6))),
+            const Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: [0, 0.28, 0.5, 0.72, 1],
+                    colors: [
+                      Color(0x40000000),
+                      Color(0x00000000),
+                      Color(0x59000000),
+                      Color(0xD9000000),
+                      Color(0xF2000000),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              left: 18,
+              top: 18,
+              right: 18,
+              bottom: 18,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: light.withValues(alpha: 0.75), width: 1.4),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 40,
+              right: 40,
+              bottom: 40,
+              height: size.height * 0.52,
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: _fit(size.width - 80, _photoContent(p, f, text: Colors.white, accent: light)),
+              ),
+            ),
+          ],
+        );
+
+      case 'photo_top':
+        final photoHeight = size.height * 0.43;
+        return Stack(
+          children: [
+            Positioned.fill(child: _background(p)),
+            Positioned.fill(child: ornament),
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              height: photoHeight,
+              child: ClipPath(clipper: _CurveBottomClipper(), child: _photoImage()),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              height: photoHeight,
+              child: CustomPaint(painter: _CurveLinePainter(p.primary)),
+            ),
+            Positioned(
+              left: 48,
+              right: 48,
+              top: photoHeight + 14,
+              bottom: 34,
+              child: Center(child: _fit(size.width - 96, _photoContent(p, f))),
+            ),
+          ],
+        );
+
+      default:
+        final Widget frame = switch (config.layoutId) {
+          'photo_arch' => SizedBox(
+            width: 212,
+            height: 242,
+            child: CustomPaint(
+              foregroundPainter: _ArchBorderPainter(p.primary),
+              child: Padding(
+                padding: const EdgeInsets.all(7),
+                child: ClipPath(clipper: _ArchClipper(), child: _photoImage()),
+              ),
+            ),
+          ),
+          'photo_polaroid' => Transform.rotate(
+            angle: -0.05,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 6),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(3), boxShadow: shadow),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(width: 196, height: 196, child: _photoImage()),
+                  SizedBox(
+                    height: 34,
+                    child: Center(
+                      child: Text('Karibu', style: cardFont(f.script, 24, color: p.primary.withValues(alpha: 0.9))),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // photo_circle
+          _ => Container(
+            width: 176,
+            height: 176,
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: p.primary, width: 3),
+              boxShadow: shadow,
+              color: p.background.first,
+            ),
+            child: ClipOval(child: _photoImage()),
+          ),
+        };
+        final insets = _insetsFor(config.ornamentId, 'centered');
+        return Stack(
+          children: [
+            Positioned.fill(child: _background(p)),
+            Positioned.fill(child: ornament),
+            Positioned.fill(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  insets.left.clamp(48, 64),
+                  insets.top.clamp(56, 92),
+                  insets.right.clamp(48, 64),
+                  insets.bottom.clamp(44, 80),
+                ),
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        frame,
+                        const SizedBox(height: 16),
+                        SizedBox(width: size.width - 112, child: _photoContent(p, f)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+    }
+  }
+
+  /// Rangi angavu ya palette (kwa maandishi juu ya picha yenye kivuli).
+  static Color _brightOf(CardPalette p) {
+    if (p.primary.computeLuminance() > 0.35) return p.primary;
+    if (p.accent.computeLuminance() > 0.35) return p.accent;
+    return const Color(0xFFF1D98A);
+  }
+
+  /// Maelezo mafupi ya kadi yenye picha (nafasi ni ndogo kuliko template za kawaida).
+  Widget _photoContent(CardPalette p, FontPair f, {Color? text, Color? accent}) {
+    final t = text ?? p.text;
+    final a = accent ?? p.primary;
+    final hosts = event.hostNames;
+    final extras = [
+      if (_has(event.dressCode)) 'Mavazi: ${event.dressCode}',
+      if (_has(event.contactPhone)) 'Simu: ${event.contactPhone}',
+    ];
+    final align = config.showQr ? CrossAxisAlignment.start : CrossAxisAlignment.center;
+    final textAlign = config.showQr ? TextAlign.left : TextAlign.center;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          _heading.toUpperCase(),
+          textAlign: TextAlign.center,
+          style: cardFont(f.body, 12, color: a, letterSpacing: 3.5, weight: FontWeight.w700),
+        ),
+        const SizedBox(height: 6),
+        Text('Mpendwa', style: cardFont(f.body, 12, color: t.withValues(alpha: 0.8), letterSpacing: 2)),
+        Text(
+          guestName ?? 'Jina la Mwalikwa',
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          style: cardFont(f.script, 36, color: a, height: 1.12),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          _has(hosts) ? '$hosts wanayo furaha kukualika kwenye' : 'Unakaribishwa kwenye',
+          textAlign: TextAlign.center,
+          style: cardFont(f.body, 13.5, color: t, height: 1.3),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _title(f),
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          style: cardFont(
+            f.title,
+            f.titleUpper ? 26 : 30,
+            color: t,
+            weight: FontWeight.w700,
+            height: 1.1,
+            letterSpacing: f.titleUpper ? 1.5 : 0,
+          ),
+        ),
+        const SizedBox(height: 10),
+        _Divider(color: a),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: align,
+                children: [
+                  Text(
+                    swahiliDate(event.eventDate),
+                    textAlign: textAlign,
+                    style: cardFont(f.body, 15, color: t, weight: FontWeight.w700),
+                  ),
+                  Text(
+                    swahiliTime(event.eventDate),
+                    textAlign: textAlign,
+                    style: cardFont(f.body, 14, color: t),
+                  ),
+                  if (_has(event.venue))
+                    Text(
+                      event.venue!,
+                      textAlign: textAlign,
+                      maxLines: 2,
+                      style: cardFont(f.body, 14, color: t),
+                    ),
+                ],
+              ),
+            ),
+            if (config.showQr) ...[
+              const SizedBox(width: 16),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _qr(62, const Color(0xFF111111)),
+                  const SizedBox(height: 3),
+                  Text(
+                    seats != null && seats! > 1 ? 'Watu $seats' : 'Onyesha mlangoni',
+                    style: cardFont(f.body, 9.5, color: t.withValues(alpha: 0.8)),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+        if (extras.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            extras.join('  ·  '),
+            textAlign: TextAlign.center,
+            style: cardFont(f.body, 11.5, color: t.withValues(alpha: 0.85)),
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _qr(double side, Color fg) {
     final data = qrData ?? 'MWALIKO:mfano';
     return Container(
@@ -452,4 +762,76 @@ class _BannerPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BannerPainter old) => old.color != color;
+}
+
+/// Picha ya juu yenye upinde chini.
+class _CurveBottomClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) => _curvePath(size)..close();
+
+  @override
+  bool shouldReclip(_CurveBottomClipper oldClipper) => false;
+}
+
+Path _curvePath(Size size) => Path()
+  ..lineTo(size.width, 0)
+  ..lineTo(size.width, size.height - 34)
+  ..quadraticBezierTo(size.width / 2, size.height + 22, 0, size.height - 34);
+
+class _CurveLinePainter extends CustomPainter {
+  _CurveLinePainter(this.color);
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path()
+      ..moveTo(size.width, size.height - 34)
+      ..quadraticBezierTo(size.width / 2, size.height + 22, 0, size.height - 34);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_CurveLinePainter old) => old.color != color;
+}
+
+/// Dirisha la tao (juu nusu duara).
+Path _archPath(Rect r) {
+  final radius = r.width / 2;
+  return Path()
+    ..moveTo(r.left, r.bottom)
+    ..lineTo(r.left, r.top + radius)
+    ..arcToPoint(Offset(r.right, r.top + radius), radius: Radius.circular(radius))
+    ..lineTo(r.right, r.bottom)
+    ..close();
+}
+
+class _ArchClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) => _archPath(Offset.zero & size);
+
+  @override
+  bool shouldReclip(_ArchClipper oldClipper) => false;
+}
+
+class _ArchBorderPainter extends CustomPainter {
+  _ArchBorderPainter(this.color);
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stroke = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke;
+    canvas.drawPath(_archPath((Offset.zero & size).deflate(1.5)), stroke..strokeWidth = 3);
+    canvas.drawPath(_archPath((Offset.zero & size).deflate(5.5)), stroke..strokeWidth = 1);
+  }
+
+  @override
+  bool shouldRepaint(_ArchBorderPainter old) => old.color != color;
 }

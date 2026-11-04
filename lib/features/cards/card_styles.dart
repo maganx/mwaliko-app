@@ -178,6 +178,14 @@ const ornamentNames = <String, String>{
 
 const layoutIds = <String>['centered', 'framed', 'banner'];
 
+const photoLayoutNames = <String, String>{
+  'photo_circle': 'Picha ya duara',
+  'photo_arch': 'Picha ya tao',
+  'photo_top': 'Picha juu',
+  'photo_full': 'Picha nzima',
+  'photo_polaroid': 'Polaroid',
+};
+
 CardPalette paletteById(String id) => palettes.firstWhere((p) => p.id == id, orElse: () => palettes.first);
 FontPair fontPairById(String id) => fontPairs.firstWhere((f) => f.id == id, orElse: () => fontPairs.first);
 
@@ -246,16 +254,32 @@ class CardGenerator {
   }
 
   /// Design [count] tofauti (hakuna mbili zinazofanana kabisa).
-  List<CardConfig> generateMany(CardConfig base, int count, {String? eventType}) {
+  List<CardConfig> generateMany(CardConfig base, int count, {String? eventType}) =>
+      _unique(count, () => generate(base, eventType: eventType));
+
+  /// Design [count] zenye picha ya mteja ([CardConfig.photoPath]): kila layout ya picha inatokea,
+  /// na rangi, mapambo na fonts zinachanganywa upya kila mara.
+  List<CardConfig> generateWithPhoto(CardConfig base, int count, {String? eventType}) {
+    final layouts = [...photoLayoutIds]..shuffle(_rng);
+    var i = 0;
+    return _unique(count, () {
+      final c = generate(base, eventType: eventType);
+      return c.copyWith(layoutId: layouts[i++ % layouts.length]);
+    });
+  }
+
+  List<CardConfig> _unique(int count, CardConfig Function() next) {
     final seen = <String>{};
     final out = <CardConfig>[];
     var attempts = 0;
     while (out.length < count && attempts < count * 20) {
       attempts++;
-      final c = generate(base, eventType: eventType);
-      final key = '${c.paletteId}|${c.ornamentId}|${c.fontPairId}|${c.layoutId}';
-      if (seen.add(key)) out.add(c);
+      final c = next();
+      if (seen.add(designKey(c))) out.add(c);
     }
     return out;
   }
 }
+
+/// Utambulisho wa design ya template (kulinganisha iliyochaguliwa).
+String designKey(CardConfig c) => '${c.paletteId}|${c.ornamentId}|${c.fontPairId}|${c.layoutId}';

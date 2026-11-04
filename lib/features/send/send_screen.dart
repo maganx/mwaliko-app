@@ -125,8 +125,9 @@ class _SendScreenState extends State<SendScreen> {
   Future<void> _send(_SendData d, List<Guest> targets, int cost) async {
     if (cost > d.credits) return _needCredits(cost, d.credits, d.pricing);
 
-    // Kadi binafsi ambazo bado hazijatengenezwa zinatengenezwa hapa kabla ya kutuma, ili mteja asisahau.
-    final withoutCard = targets.where((g) => g.cardPath == null).toList();
+    // Kadi binafsi ambazo hazijatengenezwa, au ni za design/maelezo ya zamani (mf. picha mpya),
+    // zinatengenezwa hapa kabla ya kutuma, ili mwalikwa apate kadi ya sasa.
+    final stale = targets.where((g) => !CardExporter.isCurrent(d.event, g)).toList();
     final ok = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
@@ -134,7 +135,7 @@ class _SendScreenState extends State<SendScreen> {
         content: Text(
           'Waalikwa ${targets.length} kupitia ${_channels.map((c) => c.label).join(', ')}.\n'
           'Salio litakatwa mialiko $cost (${formatTzs(d.pricing.priceFor(cost))}).'
-          '${withoutCard.isNotEmpty ? '\n\nKadi binafsi ${withoutCard.length} zitatengenezwa kwanza (jina na QR ya kila mwalikwa).' : ''}',
+          '${stale.isNotEmpty ? '\n\nKadi binafsi ${stale.length} zitatengenezwa kwanza kwa design ya sasa (jina na QR ya kila mwalikwa).' : ''}',
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Hapana')),
@@ -151,13 +152,13 @@ class _SendScreenState extends State<SendScreen> {
     setState(() {
       _sending = true;
       _progressLabel = 'Inatengeneza kadi';
-      _progress = (0, withoutCard.length);
+      _progress = (0, stale.length);
     });
     try {
-      if (withoutCard.isNotEmpty) {
+      if (stale.isNotEmpty) {
         await CardExporter().exportAll(
           event: d.event,
-          guests: withoutCard,
+          guests: stale,
           onProgress: (done, total) => setState(() => _progress = (done, total)),
         );
       }

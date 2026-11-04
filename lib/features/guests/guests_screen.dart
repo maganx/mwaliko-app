@@ -6,6 +6,8 @@ import '../../core/config.dart';
 import '../../core/phone.dart';
 import '../../core/theme.dart';
 import '../../data/cards_repository.dart';
+import '../../data/events_repository.dart';
+import '../cards/card_exporter.dart';
 import '../../data/guests_repository.dart';
 import '../../models/guest.dart';
 import '../../widgets/async_view.dart';
@@ -96,15 +98,12 @@ class _GuestsScreenState extends State<GuestsScreen> {
 
   /// Kushiriki kadi binafsi kupitia app yoyote (WhatsApp ya kawaida, Telegram n.k.) bila gharama ya API.
   Future<void> _share(Guest g) async {
-    if (g.cardPath == null) {
-      showSnack(context, 'Tengeneza kadi kwanza kwenye Studio ya kadi');
-      return;
-    }
     try {
-      final bytes = await const CardsRepository().cardBytes(g.cardPath!);
-      final rsvp = AppConfig.rsvpBaseUrl.isEmpty
-          ? ''
-          : '\nThibitisha kuhudhuria: ${AppConfig.rsvpBaseUrl}?t=${g.rsvpToken}';
+      // Kadi ya zamani (au isiyokuwepo) inatengenezwa upya kwa design ya sasa kabla ya kushiriki.
+      final event = await const EventsRepository().get(widget.eventId);
+      final path = CardExporter.isCurrent(event, g) ? g.cardPath! : await CardExporter().exportOne(event, g);
+      final bytes = await const CardsRepository().cardBytes(path);
+      final rsvp = '\nThibitisha kuhudhuria: ${AppConfig.rsvpLink(g.rsvpToken)}';
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile.fromData(bytes, mimeType: 'image/png', name: 'mwaliko-${g.name}.png')],
@@ -352,7 +351,6 @@ class _GuestRow extends StatelessWidget {
             itemBuilder: (_) => [
               PopupMenuItem(
                 value: 'share',
-                enabled: g.cardPath != null,
                 child: const ListTile(leading: Icon(Icons.share_outlined), title: Text('Shiriki kadi')),
               ),
               const PopupMenuItem(

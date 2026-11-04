@@ -19,6 +19,7 @@ class CardConfig {
     this.qrPosition = const Offset(0.85, 0.88),
     this.qrSize = 0.16,
     this.chosen = false,
+    this.photoPath,
   });
 
   final CardMode mode;
@@ -30,7 +31,12 @@ class CardConfig {
   final String paletteId;
   final String ornamentId;
   final String fontPairId;
+
+  /// `centered`, `framed`, `banner`, au layout ya picha (`photo_*`, angalia [photoLayoutIds]).
   final String layoutId;
+
+  /// Picha ya mteja (mf. maharusi) inayowekwa ndani ya template za picha.
+  final String? photoPath;
 
   // Design ya mteja
   final String? customImagePath;
@@ -44,6 +50,9 @@ class CardConfig {
   final double qrSize; // upana wa QR kama sehemu ya upana wa kadi
 
   bool get isCustom => mode == CardMode.custom && customImagePath != null;
+
+  /// Kadi inaonyesha picha ya mteja ndani ya template.
+  bool get hasPhoto => !isCustom && photoPath != null && photoLayoutIds.contains(layoutId);
 
   /// Uwiano wa kadi (upana / urefu).
   double get aspectRatio => isCustom ? customAspect : 4 / 5;
@@ -64,6 +73,7 @@ class CardConfig {
     Offset? qrPosition,
     double? qrSize,
     bool? chosen,
+    String? photoPath,
   }) => CardConfig(
     mode: mode ?? this.mode,
     paletteId: paletteId ?? this.paletteId,
@@ -80,6 +90,7 @@ class CardConfig {
     qrPosition: qrPosition ?? this.qrPosition,
     qrSize: qrSize ?? this.qrSize,
     chosen: chosen ?? this.chosen,
+    photoPath: photoPath ?? this.photoPath,
   );
 
   factory CardConfig.fromJson(Map<String, dynamic>? j) {
@@ -104,6 +115,7 @@ class CardConfig {
       qrSize: d(j['qr_size'], fb.qrSize),
       // Matukio ya zamani hayana "chosen": design yao ilishachaguliwa.
       chosen: j['chosen'] as bool? ?? true,
+      photoPath: j['photo_path'] as String?,
     );
   }
 
@@ -123,7 +135,11 @@ class CardConfig {
     'qr_pos': [qrPosition.dx, qrPosition.dy],
     'qr_size': qrSize,
     'chosen': chosen,
+    if (photoPath != null) 'photo_path': photoPath,
   };
 }
+
+/// Layout za template zinazoonyesha picha ya mteja.
+const photoLayoutIds = <String>['photo_circle', 'photo_arch', 'photo_top', 'photo_full', 'photo_polaroid'];
 
 enum CardMode { template, custom }
